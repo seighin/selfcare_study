@@ -1,24 +1,103 @@
 ---
-title: "Analysis"
+title: "Selfcare Study"
 author: "Michael Shyne"
 date: "05/28/2015"
 output: html_document
 ---
 
-## Load raw data
+## Data
 
-```{r}
-sc.raw <- read.csv('selfcaredata.csv', stringsAsFactors=F)
-sc.proc <- sc.raw
+The data for this study was comprised of "pre" and "post" self-care assessments (Health Promoting Lifestyle Profile II) given near the begining and near the end of the semester, respectively, of a graduate level nursing theory class along with self-identified demographic information. The assessments were annoymous. "Pre" and "post" assessments were matched using secret codes, a short word or number selected by each subject. There were four sections of the class, separated into two groups randomly. Both groups were instructed on the importance of self-care and asked to write a reflective summary of their self-care activities. In addition, subjects in group A were required to create and implement a self-care plan based on the findings of the initial assessment.
+
+The Health-Promoting Lifestyle Profile II (HPLP II) consists of 52 Likert scale questions with 4 possible answers, never (N), sometimes (S), often (O) and routinely (R). The HPLP II generates seven scores, an overall score and categorical scores for health responsibility, physical activity, nutrition, spiritual growth, interpersonal relations and stress management.  The scores are calculated by rendering each answer as a number, 1 for never, 2 for sometimes, 3 for often and 4 for routinely, and taking the mean of all answers for the overall score or the mean of a specified collection of answers for each category score.
+
+Addition demographic information collected included years working as an RN, gender, age and race/ethnicity.
+
+The question of interest is whether group A scores increased more than group B.
+
+### Notes on data entry
+
+An effort was made to enter demographic data exactly as written on the assessment forms, with the following exceptions:
+
+- Assessments which did not have exactly matching codes but were determined to be probable matches were given identical codes.
+- Gender was always entered as "m" or "f" or left blank.
+- For numberic information (years RN and age), fractions and months were entered as approximate decimals (i.e., "2 months" as 0.16). Values such as "< 1" were entered as 0 and "30+" were left blank.
+- Race/ethnicity was entered as written except in all lowercase for simplicity.
+
+HPLP II answers were entered as numbers as specified above. Missing answers or multiple answers (if not clear which is intended) were left blank.
+
+The raw data was saved in `selfcaredata.csv`.
+
+### Processing data
+
+The processing of the raw data is performed by the script `process.R`.
+
+The gender values were given labels of "Female", "Male" and "Unspecified". The race values were catagorized into labels "White", "Black", "Other" and "Unspecified". The following entered values were catagorized as "White":
+
+- white
+- white/caucasian
+- white/non-hispanic
+- caucasian 
+- cauc.
+- caucation
+- causasian
+
+The following entered values were catagorized as "Black":
+
+- black
+- black american
+- aa
+- african
+- african american
+- b
+
+The following entered values were catagorized as "Other":
+
+- asian
+- biracial
+- hispanic
+- indian
+- white/asian
+- white/black
+
+The "Unspecified" catagory includes missing entries and one entry of "human race".
+
+The demographic information was standardized (same values for "pre" and "post assement rows) for each subject using values from "pre" assessment unless missing or "Unspecified".
+
+The HPLP II scores were calculated by taking the mean of the appropriate answers (ignoring missing values) as follows:
+
+- **Overall** (overall): All answers, 1 - 52
+- **Health Responsibility** (hr): Answers 3, 9, 15, 21, 27, 33, 39, 45, 51
+- **Physical Activity** (pa): Answers 4, 10, 16, 22, 28, 34, 40, 46
+- **Nutrition** (n): Answers 2, 8, 14, 20, 26, 32, 38, 44, 50
+- **Spiritual Growth** (sg): Answers 6, 12, 18, 24, 30, 36, 42, 48, 52
+- **Interpersonal Relations** (ir): Answers 1, 7, 13, 19, 25, 31, 37, 43, 49
+- **Stress Management** (sm): Answers 5, 11, 17, 23, 29, 35, 41, 47
+
+The data set was transformed so that each subject occupied one row, with standardized demographic information and the seven HPLP II scores from the "pre" assessment and the seven HPLP II scores from the "post" assessment. Seven "delta" scores were calculated by subtracting the "pre" scores from the "post" scores.
+
+One subject was removed (code "1326") because one half of the "post" assessment was not completed.
+
+The processed data set was saved as `selfcare_processed.csv`.
+
+## Analysis
+
+```{r, echo=FALSE}
+require(dplyr)
+sc <- read.csv('selfcare_processed.csv')
+sc.a <- filter(sc, group=="A")
+sc.b <- filter(sc, group=="B")
 ```
 
-## Process raw data
-
-There are several steps to process the raw data. First, `group`, `section`, `code` and `time` can all be stored as factors.
+### Compare demographic data between groups
 
 ```{r}
-sc.proc$group <- factor(sc.raw$group)
-sc.proc$section <- factor(sc.raw$section)
-sc.proc$code <- factor(sc.raw$code)
-sc.proc$time <- factor(sc.raw$time)
+sc.gender.ct <- table(sc$group, sc$gender)
+print(sc.gender.ct)
+chisq.test(sc.gender.ct)
+```
+```{r}
+sc.race.ct <- table(sc$group, sc$race)
+print(sc.race.ct)
+chisq.test(sc.race.ct)
 ```

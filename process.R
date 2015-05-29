@@ -30,23 +30,6 @@ sc.proc[sc.raw$race %in% other.values, "race.cat"] <- "Other"
 sc.proc$race <- factor(sc.proc$race.cat,
                        levels=levels(factor(sc.proc$race.cat))[c(4,1,2,3)])
 
-# Calculate HPLP II scores
-overall.col <- paste0("q", c(1:52))
-hr.col <- paste0("q", c(3,9,15,21,27,33,39,45,51))
-pa.col <- paste0("q", c(4,10,16,22,28,34,40,46))
-n.col <- paste0("q", c(2,8,14,20,26,32,38,44,50))
-sg.col <- paste0("q", c(6,12,18,24,30,36,42,48,52))
-ir.col <- paste0("q", c(1,7,13,19,25,31,37,43,49))
-sm.col <- paste0("q", c(5,11,17,23,29,35,41,47))
-
-sc.proc$overall <- rowMeans(sc.raw[,overall.col], na.rm=T)
-sc.proc$hr <- rowMeans(sc.raw[,hr.col], na.rm=T)
-sc.proc$pa <- rowMeans(sc.raw[,pa.col], na.rm=T)
-sc.proc$n <- rowMeans(sc.raw[,n.col], na.rm=T)
-sc.proc$sg <- rowMeans(sc.raw[,sg.col], na.rm=T)
-sc.proc$ir <- rowMeans(sc.raw[,ir.col], na.rm=T)
-sc.proc$sm <- rowMeans(sc.raw[,sm.col], na.rm=T)
-
 # standardize demographic data between pre and post assessment
 #   use value from pre assessment unless it is missing
 sc.proc <- mutate(sc.proc, yearsrn.std=yearsrn, gender.std=gender,
@@ -70,6 +53,23 @@ for (i in 1:nrow(sc.proc)){
                                  postvalue(cd, "race"),
                                  prevalue(cd, "race"))
 }
+
+# Calculate HPLP II scores
+overall.col <- paste0("q", c(1:52))
+hr.col <- paste0("q", c(3,9,15,21,27,33,39,45,51))
+pa.col <- paste0("q", c(4,10,16,22,28,34,40,46))
+n.col <- paste0("q", c(2,8,14,20,26,32,38,44,50))
+sg.col <- paste0("q", c(6,12,18,24,30,36,42,48,52))
+ir.col <- paste0("q", c(1,7,13,19,25,31,37,43,49))
+sm.col <- paste0("q", c(5,11,17,23,29,35,41,47))
+
+sc.proc$overall <- rowMeans(sc.raw[,overall.col], na.rm=T)
+sc.proc$hr <- rowMeans(sc.raw[,hr.col], na.rm=T)
+sc.proc$pa <- rowMeans(sc.raw[,pa.col], na.rm=T)
+sc.proc$n <- rowMeans(sc.raw[,n.col], na.rm=T)
+sc.proc$sg <- rowMeans(sc.raw[,sg.col], na.rm=T)
+sc.proc$ir <- rowMeans(sc.raw[,ir.col], na.rm=T)
+sc.proc$sm <- rowMeans(sc.raw[,sm.col], na.rm=T)
 
 # transform data to one row per subject with pre, post and delta scores
 #   (also remove incomplete case, code="1326")
