@@ -1,0 +1,24 @@
+---
+title: "Analysis"
+author: "Michael Shyne"
+date: "05/28/2015"
+output: html_document
+---
+
+## Load raw data
+
+```{r}
+sc.raw <- read.csv('selfcaredata.csv', stringsAsFactors=F)
+sc.proc <- sc.raw
+```
+
+## Process raw data
+
+There are several steps to process the raw data. First, `group`, `section`, `code` and `time` can all be stored as factors.
+
+```{r}
+sc.proc$group <- factor(sc.raw$group)
+sc.proc$section <- factor(sc.raw$section)
+sc.proc$code <- factor(sc.raw$code)
+sc.proc$time <- factor(sc.raw$time)
+```
