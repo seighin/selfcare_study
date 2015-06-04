@@ -210,3 +210,47 @@ sc12.race.ft
 #### Summary
 
 Age (p=`r sc.age.tt$p.value`, p=`r sc12.age.tt$p.value`) and gender (p=`r sc.gender.ft$p.value`, p=`r sc12.gender.ft$p.value`) showed no significant differences between groups, regardless of whether section 3 was included. Years RN (p=`r sc.yearsrn.tt$p.value`, p=`r sc12.yearsrn.tt$p.value`) was significantly different between groups, regardless of whether section 3 was included, and race showed significant differences between groups with section 3  (p=`r sc.race.ft$p.value`) and no significant difference without section 3  (p=`r sc12.race.ft$p.value`).
+
+### Tests
+
+Since years RN and race show significant differences between groups, those variables will be tested for effects on delta scores.
+
+#### Years RN (with section 3)
+```{r}
+summary(lm(overall_delta~yearsrn, data=sc))
+summary(lm(hr_delta~yearsrn, data=sc))
+summary(lm(pa_delta~yearsrn, data=sc))
+summary(lm(n_delta~yearsrn, data=sc))
+summary(lm(sg_delta~yearsrn, data=sc))
+summary(lm(ir_delta~yearsrn, data=sc))
+summary(lm(sm_delta~yearsrn, data=sc))
+```
+
+#### Race (with section 3)
+```{r}
+summary(lm(overall_delta~race, data=sc))
+summary(lm(hr_delta~race, data=sc))
+summary(lm(pa_delta~race, data=sc))
+summary(lm(n_delta~race, data=sc))
+summary(lm(sg_delta~race, data=sc))
+summary(lm(ir_delta~race, data=sc))
+summary(lm(sm_delta~race, data=sc))
+```
+
+#### Group (with section 3)
+
+Since years RN and race showed no significant interaction with any delta scores, one sided t tests will be conducted testing the alternative hypothesis that group A delta scores are larger than group B.
+
+```{r}
+t.test(overall_delta~group, data=sc, alt="g")
+t.test(hr_delta~group, data=sc, alt="g")
+t.test(pa_delta~group, data=sc, alt="g")
+t.test(n_delta~group, data=sc, alt="g")
+t.test(sg_delta~group, data=sc, alt="g")
+t.test(ir_delta~group, data=sc, alt="g")
+t.test(sm_delta~group, data=sc, alt="g")
+```
+
+### Results
+
+While mean delta scores were larger in group A than group B for overall and each category, the only scores to be significantly larger are nutrition (p=`r t.test(n_delta~group, data=sc, alt="g")$p.value`) and spirital growth (p=`r t.test(sg_delta~group, data=sc, alt="g")$p.value`)
