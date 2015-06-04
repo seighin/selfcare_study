@@ -4,10 +4,14 @@ author: "Michael Shyne"
 date: "05/28/2015"
 output: html_document
 ---
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(comment=NA,
+                      echo=FALSE, warning=FALSE, message=FALSE)
+```
 
 ## Data
 
-The data for this study was comprised of "pre" and "post" self-care assessments (Health Promoting Lifestyle Profile II) given near the begining and near the end of the semester, respectively, of a graduate level nursing theory class along with self-identified demographic information. The assessments were annoymous. "Pre" and "post" assessments were matched using secret codes, a short word or number selected by each subject. There were four sections of the class, separated into two groups randomly. Both groups were instructed on the importance of self-care and asked to write a reflective summary of their self-care activities. In addition, subjects in group A were required to create and implement a self-care plan based on the findings of the initial assessment.
+The data for this study was comprised of "pre" and "post" self-care assessments (Health Promoting Lifestyle Profile II) given near the beginning and near the end of the semester, respectively, of a graduate level nursing theory class along with self-identified demographic information. The assessments were anonymous. "Pre" and "post" assessments were matched using secret codes, a short word or number selected by each subject. There were four sections of the class, separated into two groups randomly. Both groups were instructed on the importance of self-care and asked to write a reflective summary of their self-care activities. In addition, subjects in group A were required to create and implement a self-care plan based on the findings of the initial assessment.
 
 The Health-Promoting Lifestyle Profile II (HPLP II) consists of 52 Likert scale questions with 4 possible answers, never (N), sometimes (S), often (O) and routinely (R). The HPLP II generates seven scores, an overall score and categorical scores for health responsibility, physical activity, nutrition, spiritual growth, interpersonal relations and stress management.  The scores are calculated by rendering each answer as a number, 1 for never, 2 for sometimes, 3 for often and 4 for routinely, and taking the mean of all answers for the overall score or the mean of a specified collection of answers for each category score.
 
@@ -21,7 +25,7 @@ An effort was made to enter demographic data exactly as written on the assessmen
 
 - Assessments which did not have exactly matching codes but were determined to be probable matches were given identical codes.
 - Gender was always entered as "m" or "f" or left blank.
-- For numberic information (years RN and age), fractions and months were entered as approximate decimals (i.e., "2 months" as 0.16). Values such as "< 1" were entered as 0 and "30+" were left blank.
+- For numeric information (years RN and age), fractions and months were entered as approximate decimals (i.e., "2 months" as 0.16). Values such as "< 1" were entered as 0 and "30+" were left blank.
 - Race/ethnicity was entered as written except in all lowercase for simplicity.
 
 HPLP II answers were entered as numbers as specified above. Missing answers or multiple answers (if not clear which is intended) were left blank.
@@ -32,7 +36,7 @@ The raw data was saved in `selfcaredata.csv`.
 
 The processing of the raw data is performed by the script `process.R`.
 
-The gender values were given labels of "Female", "Male" and "Unspecified". The race values were catagorized into labels "White", "Black", "Other" and "Unspecified". The following entered values were catagorized as "White":
+The gender values were given labels of "Female", "Male" and "Unspecified". The race values were categorized into labels "White", "Black", "Other" and "Unspecified". The following entered values were categorized as "White":
 
 - white
 - white/caucasian
@@ -42,7 +46,7 @@ The gender values were given labels of "Female", "Male" and "Unspecified". The r
 - caucation
 - causasian
 
-The following entered values were catagorized as "Black":
+The following entered values were categorized as "Black":
 
 - black
 - black american
@@ -51,7 +55,7 @@ The following entered values were catagorized as "Black":
 - african american
 - b
 
-The following entered values were catagorized as "Other":
+The following entered values were categorized as "Other":
 
 - asian
 - biracial
@@ -60,9 +64,9 @@ The following entered values were catagorized as "Other":
 - white/asian
 - white/black
 
-The "Unspecified" catagory includes missing entries and one entry of "human race".
+The "Unspecified" category includes missing entries and one entry of "human race".
 
-The demographic information was standardized (same values for "pre" and "post assement rows) for each subject using values from "pre" assessment unless missing or "Unspecified".
+The demographic information was standardized (same values for "pre" and "post assessment rows) for each subject using values from "pre" assessment unless missing or "Unspecified".
 
 The HPLP II scores were calculated by taking the mean of the appropriate answers (ignoring missing values) as follows:
 
@@ -82,22 +86,127 @@ The processed data set was saved as `selfcare_processed.csv`.
 
 ## Analysis
 
-```{r, echo=FALSE}
-require(dplyr)
+```{r}
+require(dplyr, quiet=T, warn=F)
+require(xtable)
+require(knitr)
 sc <- read.csv('selfcare_processed.csv')
 sc.a <- filter(sc, group=="A")
 sc.b <- filter(sc, group=="B")
+sc12 <- filter(sc, section != 3)
+sc12.a <- filter(sc12, group=="A")
+sc12.b <- filter(sc12, group=="B")
 ```
 
 ### Compare demographic data between groups
 
+#### Years RN (with section 3)
+```{r}
+sc.a.sum <- summary(sc.a$yearsrn)
+sc.b.sum <- summary(sc.b$yearsrn)
+sc.yearsrn.sum <- array(c(sc.a.sum[1], sc.b.sum[1],
+                          sc.a.sum[3], sc.b.sum[3],
+                          sc.a.sum[6], sc.b.sum[6],
+                          sc.a.sum[4], sc.b.sum[4],
+                          sd(sc.a$yearsrn, na.rm=T), sd(sc.b$yearsrn, na.rm=T),
+                          sum(is.na(sc.a$yearsrn)), sum(is.na(sc.b$yearsrn))),
+                        dim=c(2,6),
+                        dimnames= list(Group=c("A", "B"), 
+                                       Summary=c("Min", "Median", "Max", 
+                                                 "Mean", "Std Dev", "Missing")))
+kable(sc.yearsrn.sum)
+sc.yearsrn.tt <- t.test(yearsrn~group, data=sc)
+sc.yearsrn.tt
+```
+
+#### Years RN (without section 3)
+```{r}
+sc12.a.sum <- summary(sc12.a$yearsrn)
+sc12.b.sum <- summary(sc12.b$yearsrn)
+sc12.yearsrn.sum <- array(c(sc12.a.sum[1], sc12.b.sum[1],
+                          sc12.a.sum[3], sc12.b.sum[3],
+                          sc12.a.sum[6], sc12.b.sum[6],
+                          sc12.a.sum[4], sc12.b.sum[4],
+                          sd(sc12.a$yearsrn, na.rm=T), sd(sc12.b$yearsrn, na.rm=T),
+                          sum(is.na(sc12.a$yearsrn)), sum(is.na(sc12.b$yearsrn))),
+                        dim=c(2,6),
+                        dimnames= list(Group=c("A", "B"), 
+                                       Summary=c("Min", "Median", "Max", 
+                                                 "Mean", "Std Dev", "Missing")))
+kable(sc12.yearsrn.sum)
+sc12.yearsrn.tt <- t.test(yearsrn~group, data=sc12)
+sc12.yearsrn.tt 
+```
+#### Age (with section 3)
+```{r}
+sc.a.sum <- summary(sc.a$age)
+sc.b.sum <- summary(sc.b$age)
+sc.age.sum <- array(c(sc.a.sum[1], sc.b.sum[1],
+                          sc.a.sum[3], sc.b.sum[3],
+                          sc.a.sum[6], sc.b.sum[6],
+                          sc.a.sum[4], sc.b.sum[4],
+                          sd(sc.a$age, na.rm=T), sd(sc.b$age, na.rm=T),
+                          sum(is.na(sc.a$age)), sum(is.na(sc.b$age))),
+                        dim=c(2,6),
+                        dimnames= list(Group=c("A", "B"), 
+                                       Summary=c("Min", "Median", "Max", 
+                                                 "Mean", "Std Dev", "Missing")))
+kable(sc.age.sum)
+sc.age.tt <- t.test(age~group, data=sc)
+sc.age.tt
+```
+
+#### Age (without section 3)
+```{r}
+sc12.a.sum <- summary(sc12.a$age)
+sc12.b.sum <- summary(sc12.b$age)
+sc12.age.sum <- array(c(sc12.a.sum[1], sc12.b.sum[1],
+                          sc12.a.sum[3], sc12.b.sum[3],
+                          sc12.a.sum[6], sc12.b.sum[6],
+                          sc12.a.sum[4], sc12.b.sum[4],
+                          sd(sc12.a$age, na.rm=T), sd(sc12.b$age, na.rm=T),
+                          sum(is.na(sc12.a$age)), sum(is.na(sc12.b$age))),
+                        dim=c(2,6),
+                        dimnames= list(Group=c("A", "B"), 
+                                       Summary=c("Min", "Median", "Max", 
+                                                 "Mean", "Std Dev", "Missing")))
+kable(sc12.age.sum)
+sc12.age.tt <- t.test(age~group, data=sc12)
+sc12.age.tt
+```
+
+#### Gender (with section 3)
 ```{r}
 sc.gender.ct <- table(sc$group, sc$gender)
-print(sc.gender.ct)
-chisq.test(sc.gender.ct)
+kable(sc.gender.ct)
+sc.gender.ft <- fisher.test(sc.gender.ct)
+sc.gender.ft
 ```
+
+#### Gender (without section 3)
+```{r}
+sc12.gender.ct <- table(sc12$group, sc12$gender)
+kable(sc12.gender.ct)
+sc12.gender.ft <- fisher.test(sc12.gender.ct)
+sc12.gender.ft
+```
+
+#### Race (with section 3)
 ```{r}
 sc.race.ct <- table(sc$group, sc$race)
-print(sc.race.ct)
-chisq.test(sc.race.ct)
+kable(sc.race.ct)
+sc.race.ft <- fisher.test(sc.race.ct)
+sc.race.ft
 ```
+
+#### Race (without section 3)
+```{r}
+sc12.race.ct <- table(sc12$group, sc12$race)
+kable(sc12.race.ct)
+sc12.race.ft <- fisher.test(sc12.race.ct)
+sc12.race.ft
+```
+
+#### Summary
+
+Age (p=`r sc.age.tt$p.value`, p=`r sc12.age.tt$p.value`) and gender (p=`r sc.gender.ft$p.value`, p=`r sc12.gender.ft$p.value`) showed no significant differences between groups, regardless of whether section 3 was included. Years RN (p=`r sc.yearsrn.tt$p.value`, p=`r sc12.yearsrn.tt$p.value`) was significantly different between groups, regardless of whether section 3 was included, and race showed significant differences between groups with section 3  (p=`r sc.race.ft$p.value`) and no significant difference without section 3  (p=`r sc12.race.ft$p.value`).
