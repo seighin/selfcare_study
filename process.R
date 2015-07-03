@@ -14,7 +14,7 @@ sc.proc$time <- factor(sc.raw$time)
 # Store gender as factor, renaming labels and accounting for blanks
 sc.proc$gender <- factor(sc.raw$gender, 
                          levels=levels(factor(sc.raw$gender))[c(2,3,1)], 
-                         labels=(c("Female", "Male","Unspecified")))
+                         labels=(c("Female", "Male",NA)))
 
 # catagorize race values into "White", "Black", "Other" and "Unspecified"
 white.values <- c("white", "white/caucasian", "white/non-hispanic",
@@ -23,12 +23,12 @@ black.values <- c("black", "black american", "aa", "african",
                   "african american", "b")
 other.values <- c("asian", "biracial", "hispanic", "indian", 
                   "white/asian", "white/black")
-sc.proc$race.cat <- "Unspecified"
+sc.proc$race.cat <- NA
 sc.proc[sc.raw$race %in% white.values, "race.cat"] <- "White"
 sc.proc[sc.raw$race %in% black.values, "race.cat"] <- "Black"
 sc.proc[sc.raw$race %in% other.values, "race.cat"] <- "Other"
 sc.proc$race <- factor(sc.proc$race.cat,
-                       levels=levels(factor(sc.proc$race.cat))[c(4,1,2,3)])
+                       levels=levels(factor(sc.proc$race.cat))[c(3,1,2)])
 
 # standardize demographic data between pre and post assessment
 #   use value from pre assessment unless it is missing
@@ -43,13 +43,13 @@ for (i in 1:nrow(sc.proc)){
     sc.proc$yearsrn.std[i] <- my_ifelse(is.na(prevalue(cd,"yearsrn")), 
                               postvalue(cd,"yearsrn"), 
                               prevalue(cd, "yearsrn"))
-    sc.proc$gender.std[i] <- my_ifelse(prevalue(cd, "gender")=="Unspecified",
+    sc.proc$gender.std[i] <- my_ifelse(is.na(prevalue(cd, "gender")),
                                  postvalue(cd, "gender"),
                                  prevalue(cd, "gender"))
     sc.proc$age.std[i] <- my_ifelse(is.na(prevalue(cd,"age")), 
                                   postvalue(cd,"age"), 
                                   prevalue(cd, "age"))
-    sc.proc$race.std[i] <- my_ifelse(prevalue(cd, "race")=="Unspecified",
+    sc.proc$race.std[i] <- my_ifelse(is.na(prevalue(cd, "race")),
                                  postvalue(cd, "race"),
                                  prevalue(cd, "race"))
 }

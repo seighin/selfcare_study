@@ -2,11 +2,29 @@
 title: "Selfcare Study"
 author: "Michael Shyne"
 date: "05/28/2015"
-output: html_document
+output:
+  html_document:
+    keep_md: yes
 ---
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(comment=NA,
                       echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+
+```{r}
+require(dplyr, quiet=T, warn=F)
+require(xtable)
+require(knitr)
+require(ggplot2)
+require(gridExtra)
+
+sc <- read.csv('selfcare_processed.csv')
+sc.a <- filter(sc, group=="A")
+sc.b <- filter(sc, group=="B")
+sc12 <- filter(sc, section != 3)
+sc12.a <- filter(sc12, group=="A")
+sc12.b <- filter(sc12, group=="B")
 ```
 
 ## Data
@@ -36,7 +54,7 @@ The raw data was saved in `selfcaredata.csv`.
 
 The processing of the raw data is performed by the script `process.R`.
 
-The gender values were given labels of "Female", "Male" and "Unspecified". The race values were categorized into labels "White", "Black", "Other" and "Unspecified". The following entered values were categorized as "White":
+The gender values were given labels of "Female", "Male" and missing (NA). The race values were categorized into labels "White", "Black", "Other" and missing (NA). The following entered values were categorized as "White":
 
 - white
 - white/caucasian
@@ -64,9 +82,9 @@ The following entered values were categorized as "Other":
 - white/asian
 - white/black
 
-The "Unspecified" category includes missing entries and one entry of "human race".
+Missing values include blank entries and one entry of "human race".
 
-The demographic information was standardized (same values for "pre" and "post assessment rows) for each subject using values from "pre" assessment unless missing or "Unspecified".
+The demographic information was standardized (same values for "pre" and "post assessment rows) for each subject using values from "pre" assessment unless missing.
 
 The HPLP II scores were calculated by taking the mean of the appropriate answers (ignoring missing values) as follows:
 
@@ -84,19 +102,52 @@ One subject was removed (code "1326") because one half of the "post" assessment 
 
 The processed data set was saved as `selfcare_processed.csv`.
 
-## Analysis
+### Data characteristics
 
-```{r}
-require(dplyr, quiet=T, warn=F)
-require(xtable)
-require(knitr)
-sc <- read.csv('selfcare_processed.csv')
-sc.a <- filter(sc, group=="A")
-sc.b <- filter(sc, group=="B")
-sc12 <- filter(sc, section != 3)
-sc12.a <- filter(sc12, group=="A")
-sc12.b <- filter(sc12, group=="B")
+```{r, results='asis'}
+m.n <- matrix(c(nrow(sc),nrow(sc.a), nrow(sc.b)), 
+            ncol=3, dimnames=list(c("n"), c("Total", "Group A", "Group B")))
+m <- rbind(m.n, Female=c(sum(sc$gender=="Female",na.rm=T), sum(sc.a$gender=="Female", na.rm=T),
+                     sum(sc.b$gender=="Female", na.rm=T)))
+m <- rbind(m, Male=c(sum(sc$gender=="Male",na.rm=T), sum(sc.a$gender=="Male", na.rm=T),
+                     sum(sc.b$gender=="Male", na.rm=T)))
+m <- rbind(m, "Gender missing"=c(sum(is.na(sc$gender)), sum(is.na(sc.a$gender)),
+                     sum(is.na(sc.b$gender))))
+m <- rbind(m, White=c(sum(sc$race=="White",na.rm=T), sum(sc.a$race=="White", na.rm=T),
+                     sum(sc.b$race=="White", na.rm=T)))
+m <- rbind(m, Black=c(sum(sc$race=="Black",na.rm=T), sum(sc.a$race=="Black", na.rm=T),
+                     sum(sc.b$race=="Black", na.rm=T)))
+m <- rbind(m, Other=c(sum(sc$race=="Other",na.rm=T), sum(sc.a$race=="Other", na.rm=T),
+                     sum(sc.b$race=="Other", na.rm=T)))
+m <- rbind(m, "Race missing"=c(sum(is.na(sc$race)), sum(is.na(sc.a$race)),
+                     sum(is.na(sc.b$race))))
+
+m.tab1 <- kable(m.n)
+m.tab2 <- kable(m[2:4,])
+m.tab3 <- kable(m[5:8,])
+
+m.tab1
+m.tab2
+m.tab3
 ```
+
+```{r, fig.height=3, fig.width=9}
+g1 <- ggplot(data=sc, aes(x=age, fill=group))
+g1 <- g1 + stat_density(alpha=.3, position = "identity")
+g1 <- g1 + geom_histogram(aes(y=..density..),position="dodge")
+g1 <- g1 + scale_fill_manual(values = c("red", "blue"))
+g1 <- g1 + ggtitle("Age distribution")
+
+g2 <- ggplot(data=sc, aes(x=yearsrn, fill=group))
+g2 <- g2 + stat_density(alpha=.3, position = "identity")
+g2 <- g2 + geom_histogram(aes(y=..density..),position="dodge")
+g2 <- g2 + scale_fill_manual(values = c("red", "blue"))
+g2 <- g2 + ggtitle("Year RN distribution")
+
+grid.arrange(g1, g2, ncol=2)
+```
+
+## Analysis
 
 ### Compare demographic data between groups
 
