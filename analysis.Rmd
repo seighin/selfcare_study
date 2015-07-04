@@ -1,7 +1,7 @@
 ---
 title: "Selfcare Study"
 author: "Michael Shyne"
-date: "05/28/2015"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
   html_document:
     keep_md: yes
@@ -14,6 +14,7 @@ knitr::opts_chunk$set(comment=NA,
 
 ```{r}
 require(dplyr, quiet=T, warn=F)
+require(tidyr)
 require(xtable)
 require(knitr)
 require(ggplot2)
@@ -22,9 +23,6 @@ require(gridExtra)
 sc <- read.csv('selfcare_processed.csv')
 sc.a <- filter(sc, group=="A")
 sc.b <- filter(sc, group=="B")
-sc12 <- filter(sc, section != 3)
-sc12.a <- filter(sc12, group=="A")
-sc12.b <- filter(sc12, group=="B")
 ```
 
 ## Data
@@ -47,6 +45,8 @@ An effort was made to enter demographic data exactly as written on the assessmen
 - Race/ethnicity was entered as written except in all lowercase for simplicity.
 
 HPLP II answers were entered as numbers as specified above. Missing answers or multiple answers (if not clear which is intended) were left blank.
+
+Six pairs of assessments which did not have matching or nearly matching codes were found to be probable matches based on demographic information and handwriting. These assessments were assigned to section 3. Initial analysis was run with and without section 3 and no significant differences were found. Therefore, section 3 assessments were included in the final analysis.
 
 The raw data was saved in `selfcaredata.csv`.
 
@@ -127,7 +127,15 @@ m.tab2 <- kable(m[2:4,])
 m.tab3 <- kable(m[5:8,])
 
 m.tab1
+```
+
+#### Gender
+```{r}
 m.tab2
+```
+
+#### Race
+```{r}
 m.tab3
 ```
 
@@ -147,48 +155,7 @@ g2 <- g2 + ggtitle("Year RN distribution")
 grid.arrange(g1, g2, ncol=2)
 ```
 
-## Analysis
-
-### Compare demographic data between groups
-
-#### Years RN (with section 3)
-```{r}
-sc.a.sum <- summary(sc.a$yearsrn)
-sc.b.sum <- summary(sc.b$yearsrn)
-sc.yearsrn.sum <- array(c(sc.a.sum[1], sc.b.sum[1],
-                          sc.a.sum[3], sc.b.sum[3],
-                          sc.a.sum[6], sc.b.sum[6],
-                          sc.a.sum[4], sc.b.sum[4],
-                          sd(sc.a$yearsrn, na.rm=T), sd(sc.b$yearsrn, na.rm=T),
-                          sum(is.na(sc.a$yearsrn)), sum(is.na(sc.b$yearsrn))),
-                        dim=c(2,6),
-                        dimnames= list(Group=c("A", "B"), 
-                                       Summary=c("Min", "Median", "Max", 
-                                                 "Mean", "Std Dev", "Missing")))
-kable(sc.yearsrn.sum)
-sc.yearsrn.tt <- t.test(yearsrn~group, data=sc)
-sc.yearsrn.tt
-```
-
-#### Years RN (without section 3)
-```{r}
-sc12.a.sum <- summary(sc12.a$yearsrn)
-sc12.b.sum <- summary(sc12.b$yearsrn)
-sc12.yearsrn.sum <- array(c(sc12.a.sum[1], sc12.b.sum[1],
-                          sc12.a.sum[3], sc12.b.sum[3],
-                          sc12.a.sum[6], sc12.b.sum[6],
-                          sc12.a.sum[4], sc12.b.sum[4],
-                          sd(sc12.a$yearsrn, na.rm=T), sd(sc12.b$yearsrn, na.rm=T),
-                          sum(is.na(sc12.a$yearsrn)), sum(is.na(sc12.b$yearsrn))),
-                        dim=c(2,6),
-                        dimnames= list(Group=c("A", "B"), 
-                                       Summary=c("Min", "Median", "Max", 
-                                                 "Mean", "Std Dev", "Missing")))
-kable(sc12.yearsrn.sum)
-sc12.yearsrn.tt <- t.test(yearsrn~group, data=sc12)
-sc12.yearsrn.tt 
-```
-#### Age (with section 3)
+#### Age
 ```{r}
 sc.a.sum <- summary(sc.a$age)
 sc.b.sum <- summary(sc.b$age)
@@ -203,94 +170,137 @@ sc.age.sum <- array(c(sc.a.sum[1], sc.b.sum[1],
                                        Summary=c("Min", "Median", "Max", 
                                                  "Mean", "Std Dev", "Missing")))
 kable(sc.age.sum)
-sc.age.tt <- t.test(age~group, data=sc)
-sc.age.tt
 ```
 
-#### Age (without section 3)
+#### Years RN
+
 ```{r}
-sc12.a.sum <- summary(sc12.a$age)
-sc12.b.sum <- summary(sc12.b$age)
-sc12.age.sum <- array(c(sc12.a.sum[1], sc12.b.sum[1],
-                          sc12.a.sum[3], sc12.b.sum[3],
-                          sc12.a.sum[6], sc12.b.sum[6],
-                          sc12.a.sum[4], sc12.b.sum[4],
-                          sd(sc12.a$age, na.rm=T), sd(sc12.b$age, na.rm=T),
-                          sum(is.na(sc12.a$age)), sum(is.na(sc12.b$age))),
+sc.a.sum <- summary(sc.a$yearsrn)
+sc.b.sum <- summary(sc.b$yearsrn)
+sc.yearsrn.sum <- array(c(sc.a.sum[1], sc.b.sum[1],
+                          sc.a.sum[3], sc.b.sum[3],
+                          sc.a.sum[6], sc.b.sum[6],
+                          sc.a.sum[4], sc.b.sum[4],
+                          sd(sc.a$yearsrn, na.rm=T), sd(sc.b$yearsrn, na.rm=T),
+                          sum(is.na(sc.a$yearsrn)), sum(is.na(sc.b$yearsrn))),
                         dim=c(2,6),
                         dimnames= list(Group=c("A", "B"), 
                                        Summary=c("Min", "Median", "Max", 
                                                  "Mean", "Std Dev", "Missing")))
-kable(sc12.age.sum)
-sc12.age.tt <- t.test(age~group, data=sc12)
-sc12.age.tt
+kable(sc.yearsrn.sum)
 ```
 
-#### Gender (with section 3)
+## Analysis
+
+### Compare demographic data between groups
+
+#### Years RN
+```{r}
+sc.yearsrn.tt <- t.test(yearsrn~group, data=sc)
+sc.yearsrn.tt
+```
+
+#### Age
+```{r}
+sc.age.tt <- t.test(age~group, data=sc)
+sc.age.tt
+```
+
+#### Gender
 ```{r}
 sc.gender.ct <- table(sc$group, sc$gender)
-kable(sc.gender.ct)
+# kable(sc.gender.ct)
 sc.gender.ft <- fisher.test(sc.gender.ct)
 sc.gender.ft
 ```
 
-#### Gender (without section 3)
-```{r}
-sc12.gender.ct <- table(sc12$group, sc12$gender)
-kable(sc12.gender.ct)
-sc12.gender.ft <- fisher.test(sc12.gender.ct)
-sc12.gender.ft
-```
-
-#### Race (with section 3)
+#### Race
 ```{r}
 sc.race.ct <- table(sc$group, sc$race)
-kable(sc.race.ct)
+# kable(sc.race.ct)
 sc.race.ft <- fisher.test(sc.race.ct)
 sc.race.ft
 ```
 
-#### Race (without section 3)
-```{r}
-sc12.race.ct <- table(sc12$group, sc12$race)
-kable(sc12.race.ct)
-sc12.race.ft <- fisher.test(sc12.race.ct)
-sc12.race.ft
-```
-
 #### Summary
 
-Age (p=`r sc.age.tt$p.value`, p=`r sc12.age.tt$p.value`) and gender (p=`r sc.gender.ft$p.value`, p=`r sc12.gender.ft$p.value`) showed no significant differences between groups, regardless of whether section 3 was included. Years RN (p=`r sc.yearsrn.tt$p.value`, p=`r sc12.yearsrn.tt$p.value`) was significantly different between groups, regardless of whether section 3 was included, and race showed significant differences between groups with section 3  (p=`r sc.race.ft$p.value`) and no significant difference without section 3  (p=`r sc12.race.ft$p.value`).
-
-### Tests
+Age (p=`r sc.age.tt$p.value`) and gender (p=`r sc.gender.ft$p.value`) showed no significant differences between groups. Years RN (p=`r sc.yearsrn.tt$p.value`) and race (p=`r sc.race.ft$p.value`) showed significant differences between groups.
 
 Since years RN and race show significant differences between groups, those variables will be tested for effects on delta scores.
 
-#### Years RN (with section 3)
+### Interaction
+
+#### Years RN and Race
+
+Years RN values represent p-values for alternative hypothesis that the coefficient for the linear regression, delta score vs. years RN, is not zero. Race values represent p-values for the ANOVA analysis of delta scores vs. race.
+
 ```{r}
-summary(lm(overall_delta~yearsrn, data=sc))
-summary(lm(hr_delta~yearsrn, data=sc))
-summary(lm(pa_delta~yearsrn, data=sc))
-summary(lm(n_delta~yearsrn, data=sc))
-summary(lm(sg_delta~yearsrn, data=sc))
-summary(lm(ir_delta~yearsrn, data=sc))
-summary(lm(sm_delta~yearsrn, data=sc))
+ovr.yrn.lm <- lm(overall_delta~yearsrn, data=sc)
+hr.yrn.lm <- lm(hr_delta~yearsrn, data=sc)
+pa.yrn.lm <- lm(pa_delta~yearsrn, data=sc)
+n.yrn.lm <- lm(n_delta~yearsrn, data=sc)
+sg.yrn.lm <- lm(sg_delta~yearsrn, data=sc)
+ir.yrn.lm <- lm(ir_delta~yearsrn, data=sc)
+sm.yrn.lm <- lm(sm_delta~yearsrn, data=sc)
+
+ovr.race.lm <- lm(overall_delta~race, data=sc)
+hr.race.lm <- lm(hr_delta~race, data=sc)
+pa.race.lm <- lm(pa_delta~race, data=sc)
+n.race.lm <- lm(n_delta~race, data=sc)
+sg.race.lm <- lm(sg_delta~race, data=sc)
+ir.race.lm <- lm(ir_delta~race, data=sc)
+sm.race.lm <- lm(sm_delta~race, data=sc)
+
+m <- matrix(c(summary(ovr.yrn.lm)$coef[2,4], 
+              anova(ovr.race.lm)$P[1]), 
+            ncol=2, dimnames=list(c("Overall"), c("Years RN", "Race")))
+m <- rbind(m, "Health Responsibility"=c(summary(hr.yrn.lm)$coef[2,4], 
+              anova(hr.race.lm)$P[1]))
+m <- rbind(m, "Physical Activity"=c(summary(pa.yrn.lm)$coef[2,4], 
+              anova(pa.race.lm)$P[1]))
+m <- rbind(m, "Nutrition"=c(summary(n.yrn.lm)$coef[2,4], 
+              anova(n.race.lm)$P[1]))
+m <- rbind(m, "Spiritual Growth"=c(summary(sg.yrn.lm)$coef[2,4], 
+              anova(sg.race.lm)$P[1]))
+m <- rbind(m, "Interpersonal Relations"=c(summary(ir.yrn.lm)$coef[2,4], 
+              anova(ir.race.lm)$P[1]))
+m <- rbind(m, "Stress Management"=c(summary(sm.yrn.lm)$coef[2,4], 
+              anova(sm.race.lm)$P[1]))
+
+kable(m)
 ```
 
-#### Race (with section 3)
-```{r}
-summary(lm(overall_delta~race, data=sc))
-summary(lm(hr_delta~race, data=sc))
-summary(lm(pa_delta~race, data=sc))
-summary(lm(n_delta~race, data=sc))
-summary(lm(sg_delta~race, data=sc))
-summary(lm(ir_delta~race, data=sc))
-summary(lm(sm_delta~race, data=sc))
-```
-
-#### Group (with section 3)
+#### Group
 
 Since years RN and race showed no significant interaction with any delta scores, one sided t tests will be conducted testing the alternative hypothesis that group A delta scores are larger than group B.
+
+```{r, fig.width=10, fig.height=4}
+sc.plot <- gather(sc, type_time, score, -(X:race)) %>%
+    separate(type_time, into=c("type","time")) %>%
+    group_by(group, type, time) %>%
+    summarize(score_mean = mean(score), score_sd = sd(score), n=n())
+
+sc.plot <- ungroup(sc.plot) %>%
+    mutate(type.fac=factor(type, levels=levels(factor(type))[c(4,1,5,3,6,2,7)],
+                       labels=c("Overall","Health Responsibility", 
+                                "Physical Activity", "Nutrition",
+                                "Spiritual Growth", "Interpersonal Relations",
+                                "Stress Management")),
+           time.fac=factor(time, levels=levels(factor(time))[c(3,2,1)],
+                           labels= c("Pre", "Post", "Change")))
+
+g <- ggplot(data=sc.plot, aes(x=score_mean, y=reorder(type.fac, 8-as.numeric(type.fac)), color=group))
+g <- g + geom_errorbarh(aes(xmin=score_mean+score_sd*qt(.025, n-1)/sqrt(n),
+                            xmax=score_mean+score_sd*qt(.975, n-1)/sqrt(n)),
+                        height=.5, size=.5, alpha=.6)
+g <- g + geom_point(shape=19)
+g <- g + facet_grid(.~time.fac, scales="free_x")
+g <- g + scale_color_manual(values=c("red", "blue"))
+g <- g + xlab("Mean scores with 95% confidence interval")
+g <- g + ylab("Score category")
+
+g
+```
 
 ```{r}
 t.test(overall_delta~group, data=sc, alt="g")

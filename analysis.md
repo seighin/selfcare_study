@@ -1,6 +1,6 @@
 # Selfcare Study
 Michael Shyne  
-05/28/2015  
+`r format(Sys.time(), '%B %d, %Y')`  
 
 
 
@@ -26,6 +26,8 @@ An effort was made to enter demographic data exactly as written on the assessmen
 - Race/ethnicity was entered as written except in all lowercase for simplicity.
 
 HPLP II answers were entered as numbers as specified above. Missing answers or multiple answers (if not clear which is intended) were left blank.
+
+Six pairs of assessments which did not have matching or nearly matching codes were found to be probable matches based on demographic information and handwriting. These assessments were assigned to section 3. Initial analysis was run with and without section 3 and no significant differences were found. Therefore, section 3 assessments were included in the final analysis.
 
 The raw data was saved in `selfcaredata.csv`.
 
@@ -88,11 +90,15 @@ The processed data set was saved as `selfcare_processed.csv`.
 ---  ------  --------  --------
 n        70        39        31
 
+#### Gender
+
                   Total   Group A   Group B
 ---------------  ------  --------  --------
 Female               55        30        25
 Male                 11         8         3
 Gender missing        4         1         3
+
+#### Race
 
                 Total   Group A   Group B
 -------------  ------  --------  --------
@@ -101,18 +107,28 @@ Black              15        10         5
 Other               8         1         7
 Race missing        3         1         2
 
-![](analysis_files/figure-html/unnamed-chunk-3-1.png) 
+![](analysis_files/figure-html/unnamed-chunk-5-1.png) 
 
-## Analysis
+#### Age
 
-### Compare demographic data between groups
+      Min   Median   Max    Mean    Std Dev   Missing
+---  ----  -------  ----  ------  ---------  --------
+A      22       31    55   32.24   6.647495         2
+B      23       30    51   31.83   6.695770         1
 
-#### Years RN (with section 3)
+#### Years RN
+
 
       Min   Median   Max    Mean    Std Dev   Missing
 ---  ----  -------  ----  ------  ---------  --------
 A       0     5.00    37   6.951   6.955444         0
 B       0     1.25    15   2.789   3.554869         1
+
+## Analysis
+
+### Compare demographic data between groups
+
+#### Years RN
 
 ```
 
@@ -128,32 +144,7 @@ mean in group A mean in group B
        6.950769        2.788667 
 ```
 
-#### Years RN (without section 3)
-
-      Min   Median   Max    Mean    Std Dev   Missing
----  ----  -------  ----  ------  ---------  --------
-A       0     5.00    37   6.742   7.062358         0
-B       0     1.25    15   2.789   3.554869         1
-
-```
-
-	Welch Two Sample t-test
-
-data:  yearsrn by group
-t = 2.844, df = 48.192, p-value = 0.006519
-alternative hypothesis: true difference in means is not equal to 0
-95 percent confidence interval:
- 1.158860 6.748655
-sample estimates:
-mean in group A mean in group B 
-       6.742424        2.788667 
-```
-#### Age (with section 3)
-
-      Min   Median   Max    Mean    Std Dev   Missing
----  ----  -------  ----  ------  ---------  --------
-A      22       31    55   32.24   6.647495         2
-B      23       30    51   31.83   6.695770         1
+#### Age
 
 ```
 
@@ -169,33 +160,7 @@ mean in group A mean in group B
        32.24324        31.83333 
 ```
 
-#### Age (without section 3)
-
-      Min   Median   Max    Mean   Std Dev   Missing
----  ----  -------  ----  ------  --------  --------
-A      22       32    55   32.59   6.92289         1
-B      23       30    51   31.83   6.69577         1
-
-```
-
-	Welch Two Sample t-test
-
-data:  age by group
-t = 0.4396, df = 59.938, p-value = 0.6618
-alternative hypothesis: true difference in means is not equal to 0
-95 percent confidence interval:
- -2.699736  4.220569
-sample estimates:
-mean in group A mean in group B 
-       32.59375        31.83333 
-```
-
-#### Gender (with section 3)
-
-      Female   Male
----  -------  -----
-A         30      8
-B         25      3
+#### Gender
 
 ```
 
@@ -211,33 +176,7 @@ odds ratio
  0.4551914 
 ```
 
-#### Gender (without section 3)
-
-      Female   Male
----  -------  -----
-A         24      8
-B         25      3
-
-```
-
-	Fisher's Exact Test for Count Data
-
-data:  sc12.gender.ct
-p-value = 0.1934
-alternative hypothesis: true odds ratio is not equal to 1
-95 percent confidence interval:
- 0.05591512 1.75908104
-sample estimates:
-odds ratio 
- 0.3659606 
-```
-
-#### Race (with section 3)
-
-      Black   Other   White
----  ------  ------  ------
-A        10       1      27
-B         5       7      17
+#### Race
 
 ```
 
@@ -248,346 +187,34 @@ p-value = 0.03167
 alternative hypothesis: two.sided
 ```
 
-#### Race (without section 3)
-
-      Black   Other   White
----  ------  ------  ------
-A         9       1      22
-B         5       7      17
-
-```
-
-	Fisher's Exact Test for Count Data
-
-data:  sc12.race.ct
-p-value = 0.04593
-alternative hypothesis: two.sided
-```
-
 #### Summary
 
-Age (p=0.8034258, p=0.6618059) and gender (p=0.3307582, p=0.1934029) showed no significant differences between groups, regardless of whether section 3 was included. Years RN (p=0.002029, p=0.0065187) was significantly different between groups, regardless of whether section 3 was included, and race showed significant differences between groups with section 3  (p=0.0316749) and no significant difference without section 3  (p=0.0459331).
-
-### Tests
+Age (p=0.8034258) and gender (p=0.3307582) showed no significant differences between groups. Years RN (p=0.002029) and race (p=0.0316749) showed significant differences between groups.
 
 Since years RN and race show significant differences between groups, those variables will be tested for effects on delta scores.
 
-#### Years RN (with section 3)
+### Interaction
 
-```
+#### Years RN and Race
 
-Call:
-lm(formula = overall_delta ~ yearsrn, data = sc)
+Years RN values represent p-values for alternative hypothesis that the coefficient for the linear regression, delta score vs. years RN, is not zero. Race values represent p-values for the ANOVA analysis of delta scores vs. race.
 
-Residuals:
-    Min      1Q  Median      3Q     Max 
--0.7097 -0.1833 -0.0174  0.2134  0.7975 
 
-Coefficients:
-             Estimate Std. Error t value Pr(>|t|)   
-(Intercept)  0.156667   0.049107    3.19  0.00216 **
-yearsrn     -0.003105   0.006205   -0.50  0.61845   
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+                            Years RN        Race
+------------------------  ----------  ----------
+Overall                    0.6184470   0.0937461
+Health Responsibility      0.5228274   0.1340855
+Physical Activity          0.4576724   0.1996673
+Nutrition                  0.9118619   0.3264573
+Spiritual Growth           0.6827913   0.1707201
+Interpersonal Relations    0.9267542   0.1218452
+Stress Management          0.3743889   0.5313704
 
-Residual standard error: 0.3101 on 67 degrees of freedom
-  (1 observation deleted due to missingness)
-Multiple R-squared:  0.003723,	Adjusted R-squared:  -0.01115 
-F-statistic: 0.2504 on 1 and 67 DF,  p-value: 0.6184
-```
-
-```
-
-Call:
-lm(formula = hr_delta ~ yearsrn, data = sc)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--1.17257 -0.31170  0.00201  0.30452  1.04965 
-
-Coefficients:
-             Estimate Std. Error t value Pr(>|t|)    
-(Intercept)  0.251038   0.069060   3.635  0.00054 ***
-yearsrn     -0.005605   0.008725  -0.642  0.52283    
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.4361 on 67 degrees of freedom
-  (1 observation deleted due to missingness)
-Multiple R-squared:  0.006121,	Adjusted R-squared:  -0.008713 
-F-statistic: 0.4126 on 1 and 67 DF,  p-value: 0.5228
-```
-
-```
-
-Call:
-lm(formula = pa_delta ~ yearsrn, data = sc)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--1.01490 -0.32765 -0.06987  0.34404  1.23634 
-
-Coefficients:
-             Estimate Std. Error t value Pr(>|t|)  
-(Intercept)  0.139903   0.082448   1.697   0.0944 .
-yearsrn     -0.007782   0.010417  -0.747   0.4577  
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.5207 on 67 degrees of freedom
-  (1 observation deleted due to missingness)
-Multiple R-squared:  0.00826,	Adjusted R-squared:  -0.006542 
-F-statistic: 0.558 on 1 and 67 DF,  p-value: 0.4577
-```
-
-```
-
-Call:
-lm(formula = n_delta ~ yearsrn, data = sc)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--0.92921 -0.26947  0.06277  0.28486  0.73745 
-
-Coefficients:
-              Estimate Std. Error t value Pr(>|t|)   
-(Intercept)  0.1595834  0.0580389   2.750  0.00766 **
-yearsrn     -0.0008148  0.0073330  -0.111  0.91186   
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.3665 on 67 degrees of freedom
-  (1 observation deleted due to missingness)
-Multiple R-squared:  0.0001842,	Adjusted R-squared:  -0.01474 
-F-statistic: 0.01235 on 1 and 67 DF,  p-value: 0.9119
-```
-
-```
-
-Call:
-lm(formula = sg_delta ~ yearsrn, data = sc)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--0.87873 -0.32158 -0.01693  0.31322  1.00219 
-
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)
-(Intercept) 0.099354   0.061462   1.617    0.111
-yearsrn     0.003187   0.007766   0.410    0.683
-
-Residual standard error: 0.3882 on 67 degrees of freedom
-  (1 observation deleted due to missingness)
-Multiple R-squared:  0.002508,	Adjusted R-squared:  -0.01238 
-F-statistic: 0.1685 on 1 and 67 DF,  p-value: 0.6828
-```
-
-```
-
-Call:
-lm(formula = ir_delta ~ yearsrn, data = sc)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--0.81442 -0.25921  0.07135  0.18558  0.85190 
-
-Coefficients:
-             Estimate Std. Error t value Pr(>|t|)  
-(Intercept) 0.1474073  0.0593740   2.483   0.0156 *
-yearsrn     0.0006922  0.0075017   0.092   0.9268  
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.375 on 67 degrees of freedom
-  (1 observation deleted due to missingness)
-Multiple R-squared:  0.0001271,	Adjusted R-squared:  -0.0148 
-F-statistic: 0.008515 on 1 and 67 DF,  p-value: 0.9268
-```
-
-```
-
-Call:
-lm(formula = sm_delta ~ yearsrn, data = sc)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--1.2440 -0.3329 -0.0061  0.2605  1.2695 
-
-Coefficients:
-             Estimate Std. Error t value Pr(>|t|)
-(Intercept)  0.132542   0.079814   1.661    0.101
-yearsrn     -0.009018   0.010084  -0.894    0.374
-
-Residual standard error: 0.5041 on 67 degrees of freedom
-  (1 observation deleted due to missingness)
-Multiple R-squared:  0.01179,	Adjusted R-squared:  -0.002955 
-F-statistic: 0.7997 on 1 and 67 DF,  p-value: 0.3744
-```
-
-#### Race (with section 3)
-
-```
-
-Call:
-lm(formula = overall_delta ~ race, data = sc)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--0.7986 -0.1661 -0.0219  0.2026  0.8435 
-
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)   
-(Intercept)  0.24091    0.07874   3.060  0.00324 **
-raceOther    0.03313    0.13351   0.248  0.80483   
-raceWhite   -0.16132    0.09118  -1.769  0.08161 . 
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.305 on 64 degrees of freedom
-  (3 observations deleted due to missingness)
-Multiple R-squared:  0.0713,	Adjusted R-squared:  0.04228 
-F-statistic: 2.457 on 2 and 64 DF,  p-value: 0.09375
-```
-
-```
-
-Call:
-lm(formula = hr_delta ~ race, data = sc)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--1.14646 -0.25758 -0.03535  0.26326  1.07576 
-
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)   
-(Intercept)   0.3111     0.1109   2.805  0.00666 **
-raceOther     0.1333     0.1881   0.709  0.48093   
-raceWhite    -0.1646     0.1284  -1.282  0.20451   
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.4296 on 64 degrees of freedom
-  (3 observations deleted due to missingness)
-Multiple R-squared:  0.06086,	Adjusted R-squared:  0.03151 
-F-statistic: 2.074 on 2 and 64 DF,  p-value: 0.1341
-```
-
-```
-
-Call:
-lm(formula = pa_delta ~ race, data = sc)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--1.18810 -0.31310 -0.03571  0.33929  1.21429 
-
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)  
-(Intercept)   0.3131     0.1337   2.343   0.0223 *
-raceOther    -0.2662     0.2266  -1.175   0.2445  
-raceWhite    -0.2774     0.1548  -1.792   0.0778 .
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.5176 on 64 degrees of freedom
-  (3 observations deleted due to missingness)
-Multiple R-squared:  0.0491,	Adjusted R-squared:  0.01938 
-F-statistic: 1.652 on 2 and 64 DF,  p-value: 0.1997
-```
-
-```
-
-Call:
-lm(formula = n_delta ~ race, data = sc)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--0.87374 -0.20707  0.01515  0.23737  0.79293 
-
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)   
-(Intercept)  0.24815    0.09327   2.660  0.00985 **
-raceOther   -0.03981    0.15815  -0.252  0.80204   
-raceWhite   -0.15219    0.10801  -1.409  0.16366   
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.3612 on 64 degrees of freedom
-  (3 observations deleted due to missingness)
-Multiple R-squared:  0.03438,	Adjusted R-squared:  0.004202 
-F-statistic: 1.139 on 2 and 64 DF,  p-value: 0.3265
-```
-
-```
-
-Call:
-lm(formula = sg_delta ~ race, data = sc)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--0.8852 -0.2828  0.0037  0.2259  0.8926 
-
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)  
-(Intercept)  0.21852    0.09912   2.205   0.0311 *
-raceOther    0.07315    0.16807   0.435   0.6649  
-raceWhite   -0.15791    0.11478  -1.376   0.1737  
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.3839 on 64 degrees of freedom
-  (3 observations deleted due to missingness)
-Multiple R-squared:  0.05374,	Adjusted R-squared:  0.02417 
-F-statistic: 1.817 on 2 and 64 DF,  p-value: 0.1707
-```
-
-```
-
-Call:
-lm(formula = ir_delta ~ race, data = sc)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--0.75947 -0.23390  0.01831  0.23878  0.79609 
-
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)  
-(Intercept)  0.20741    0.09572   2.167    0.034 *
-raceOther    0.16759    0.16230   1.033    0.306  
-raceWhite   -0.11460    0.11084  -1.034    0.305  
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-Residual standard error: 0.3707 on 64 degrees of freedom
-  (3 observations deleted due to missingness)
-Multiple R-squared:  0.06366,	Adjusted R-squared:  0.0344 
-F-statistic: 2.176 on 2 and 64 DF,  p-value: 0.1218
-```
-
-```
-
-Call:
-lm(formula = sm_delta ~ race, data = sc)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--1.2500 -0.2886  0.0000  0.2932  1.2500 
-
-Coefficients:
-            Estimate Std. Error t value Pr(>|t|)
-(Intercept)  0.12500    0.13253   0.943    0.349
-raceOther    0.12500    0.22472   0.556    0.580
-raceWhite   -0.08644    0.15347  -0.563    0.575
-
-Residual standard error: 0.5133 on 64 degrees of freedom
-  (3 observations deleted due to missingness)
-Multiple R-squared:  0.01957,	Adjusted R-squared:  -0.01107 
-F-statistic: 0.6386 on 2 and 64 DF,  p-value: 0.5314
-```
-
-#### Group (with section 3)
+#### Group
 
 Since years RN and race showed no significant interaction with any delta scores, one sided t tests will be conducted testing the alternative hypothesis that group A delta scores are larger than group B.
+
+![](analysis_files/figure-html/unnamed-chunk-13-1.png) 
 
 
 ```
