@@ -124,7 +124,7 @@ B      23       30    51   31.83   6.695770         1
 A       0     5.00    37   6.951   6.955444         0
 B       0     1.25    15   2.789   3.554869         1
 
-## Analysis
+## Analysis 
 
 ### Compare demographic data between groups
 
@@ -216,105 +216,24 @@ Since years RN and race showed no significant interaction with any delta scores,
 
 ![](analysis_files/figure-html/unnamed-chunk-13-1.png) 
 
+P-values and confidence intervals from one-sided t-tests comparing the mean changes in score for each category.
 
-```
 
-	Welch Two Sample t-test
+                           A>0 (p)    (lower,   upper)   B>0 (p)    (lower,   upper)   A>B (p)    (lower,   upper)
+------------------------  --------  ---------  -------  --------  ---------  -------  --------  ---------  -------
+Overall                    0.00025    0.10233      Inf   0.05155   -0.00090      Inf   0.11622   -0.03434      Inf
+Health Responsibility      0.00054    0.12633      Inf   0.00677    0.07498      Inf   0.39224   -0.14771      Inf
+Physical Activity          0.12149   -0.04613      Inf   0.11443   -0.03694      Inf   0.45861   -0.18967      Inf
+Nutrition                  0.00059    0.11612      Inf   0.09189   -0.01774      Inf   0.03530    0.01401      Inf
+Spiritual Growth           0.00092    0.09624      Inf   0.42255   -0.10573      Inf   0.02650    0.02761      Inf
+Interpersonal Relations    0.00048    0.09618      Inf   0.06012   -0.00768      Inf   0.27503   -0.10017      Inf
+Stress Management          0.04373    0.00531      Inf   0.35142   -0.12363      Inf   0.20775   -0.10386      Inf
 
-data:  overall_delta by group
-t = 1.2056, df = 63.391, p-value = 0.1162
-alternative hypothesis: true difference in means is greater than 0
-95 percent confidence interval:
- -0.03434136         Inf
-sample estimates:
-mean in group A mean in group B 
-     0.18373835      0.09443682 
-```
-
-```
-
-	Welch Two Sample t-test
-
-data:  hr_delta by group
-t = 0.27467, df = 62.788, p-value = 0.3922
-alternative hypothesis: true difference in means is greater than 0
-95 percent confidence interval:
- -0.1477122        Inf
-sample estimates:
-mean in group A mean in group B 
-      0.2414530       0.2123656 
-```
-
-```
-
-	Welch Two Sample t-test
-
-data:  pa_delta by group
-t = 0.10433, df = 67.895, p-value = 0.4586
-alternative hypothesis: true difference in means is greater than 0
-95 percent confidence interval:
- -0.1896663        Inf
-sample estimates:
-mean in group A mean in group B 
-     0.10943223      0.09677419 
-```
-
-```
-
-	Welch Two Sample t-test
-
-data:  n_delta by group
-t = 1.837, df = 67.653, p-value = 0.0353
-alternative hypothesis: true difference in means is greater than 0
-95 percent confidence interval:
- 0.01400658        Inf
-sample estimates:
-mean in group A mean in group B 
-     0.22364672      0.07168459 
-```
-
-```
-
-	Welch Two Sample t-test
-
-data:  sg_delta by group
-t = 1.9727, df = 61.859, p-value = 0.0265
-alternative hypothesis: true difference in means is greater than 0
-95 percent confidence interval:
- 0.02761063        Inf
-sample estimates:
-mean in group A mean in group B 
-     0.19373219      0.01388889 
-```
-
-```
-
-	Welch Two Sample t-test
-
-data:  ir_delta by group
-t = 0.60153, df = 52.987, p-value = 0.275
-alternative hypothesis: true difference in means is greater than 0
-95 percent confidence interval:
- -0.1001683        Inf
-sample estimates:
-mean in group A mean in group B 
-      0.1816239       0.1254480 
-```
-
-```
-
-	Welch Two Sample t-test
-
-data:  sm_delta by group
-t = 0.81975, df = 62.067, p-value = 0.2077
-alternative hypothesis: true difference in means is greater than 0
-95 percent confidence interval:
- -0.1038554        Inf
-sample estimates:
-mean in group A mean in group B 
-     0.13644689      0.03629032 
-```
 
 ### Results
 
-While mean delta scores were larger in group A than group B for overall and each category, the only scores to be significantly larger are nutrition (p=0.0353005) and spirital growth (p=0.0265001)
+Every category score, except physical activity, showed signicant increases in group A, whereas group B showed signicant increases only in health responsibility. Only in categories nutrition and spiritual growth were changes in group A significantly larger than group B.
+
+### Non-parametric Ananlysis
+
+

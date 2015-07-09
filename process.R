@@ -54,6 +54,10 @@ for (i in 1:nrow(sc.proc)){
                                  prevalue(cd, "race"))
 }
 
+# make a copy of the processed table at this point to further process 
+#  for non-parametric analysis
+sc.nopar <- sc.proc
+
 # Calculate HPLP II scores
 overall.col <- paste0("q", c(1:52))
 hr.col <- paste0("q", c(3,9,15,21,27,33,39,45,51))
@@ -89,3 +93,34 @@ sc.final <- filter(sc.proc, !(code=="1326")) %>%
            sm_delta = sm_post - sm_pre)
 
 write.csv(sc.final, 'selfcare_processed.csv')
+
+# Now process for non-parametric analysis. We are interested in the changes
+#  for each question.
+
+# create a long table with pre and post answers to each question
+sc.nopar.mid <- sc.nopar %>%
+    gather(question, answer, q1:q52) %>%
+    select(code, group, section,yearsrn=yearsrn.std, gender=gender.std,
+           age=age.std, race=race.std, time, question, answer) %>%
+    mutate(time_question=paste(time,question,sep="_"))
+
+# add delta values for each subject and each question
+for (i in levels(sc.nopar.mid$code)) {
+    row <- filter(sc.nopar.mid, code==i)[1,]
+    for (j in levels(sc.nopar.mid$question)) {
+        new_row <- row
+        new_row$time_question <- paste0("delta_", j)
+        new_row$answer <- filter(sc.nopar.mid, code==i & question==j & time=="post")$answer -
+            filter(sc.nopar.mid, code==i & question==j & time=="pre")$answer
+        
+        sc.nopar.mid <- rbind(sc.nopar.mid, new_row)
+    }
+}
+
+# transform back into a wide table with one row per subject
+sc.nopar.final <- sc.nopar.mid %>%
+    filter(!(code=="1326")) %>%
+    select(code:race, time_question, answer) %>%
+    spread(time_question, answer)
+
+write.csv(sc.nopar.final, 'selfcare_nopar_processed.csv')

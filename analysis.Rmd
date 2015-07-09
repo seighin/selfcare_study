@@ -23,6 +23,10 @@ require(gridExtra)
 sc <- read.csv('selfcare_processed.csv')
 sc.a <- filter(sc, group=="A")
 sc.b <- filter(sc, group=="B")
+
+sc.nopar <- read.csv('selfcare_nopar_processed.csv')
+sc.nopar.a <- filter(sc.nopar, group=="A")
+sc.nopar.b <- filter(sc.nopar, group=="B")
 ```
 
 ## Data
@@ -190,7 +194,7 @@ sc.yearsrn.sum <- array(c(sc.a.sum[1], sc.b.sum[1],
 kable(sc.yearsrn.sum)
 ```
 
-## Analysis
+## Analysis 
 
 ### Compare demographic data between groups
 
@@ -302,16 +306,81 @@ g <- g + ylab("Score category")
 g
 ```
 
+P-values and confidence intervals from one-sided t-tests comparing the mean changes in score for each category.
+
 ```{r}
-t.test(overall_delta~group, data=sc, alt="g")
-t.test(hr_delta~group, data=sc, alt="g")
-t.test(pa_delta~group, data=sc, alt="g")
-t.test(n_delta~group, data=sc, alt="g")
-t.test(sg_delta~group, data=sc, alt="g")
-t.test(ir_delta~group, data=sc, alt="g")
-t.test(sm_delta~group, data=sc, alt="g")
+AB.overall.t <- t.test(overall_delta~group, data=sc, alt="g")
+AB.hr.t <- t.test(hr_delta~group, data=sc, alt="g")
+AB.pa.t <- t.test(pa_delta~group, data=sc, alt="g")
+AB.n.t <- t.test(n_delta~group, data=sc, alt="g")
+AB.sg.t <- t.test(sg_delta~group, data=sc, alt="g")
+AB.ir.t <- t.test(ir_delta~group, data=sc, alt="g")
+AB.sm.t <- t.test(sm_delta~group, data=sc, alt="g")
+
+A.overall.t <- t.test(sc.a$overall_delta, alt="g")
+A.hr.t <- t.test(sc.a$hr_delta, alt="g")
+A.pa.t <- t.test(sc.a$pa_delta, alt="g")
+A.n.t <- t.test(sc.a$n_delta, alt="g")
+A.sg.t <- t.test(sc.a$sg_delta, alt="g")
+A.ir.t <- t.test(sc.a$ir_delta, alt="g")
+A.sm.t <- t.test(sc.a$sm_delta, alt="g")
+
+B.overall.t <- t.test(sc.b$overall_delta, alt="g")
+B.hr.t <- t.test(sc.b$hr_delta, alt="g")
+B.pa.t <- t.test(sc.b$pa_delta, alt="g")
+B.n.t <- t.test(sc.b$n_delta, alt="g")
+B.sg.t <- t.test(sc.b$sg_delta, alt="g")
+B.ir.t <- t.test(sc.b$ir_delta, alt="g")
+B.sm.t <- t.test(sc.b$sm_delta, alt="g")
+
+m <- matrix(c(A.overall.t$p.value, A.overall.t$conf.int[1], A.overall.t$conf.int[2],
+              B.overall.t$p.value, B.overall.t$conf.int[1], B.overall.t$conf.int[2],
+              AB.overall.t$p.value, AB.overall.t$conf.int[1], AB.overall.t$conf.int[2]),
+            ncol=9, 
+            dimnames=list("Overall", c("A>0 (p)", "(lower,","upper)",
+                                       "B>0 (p)", "(lower,","upper)",
+                                       "A>B (p)", "(lower,","upper)")))
+m <- rbind(m, "Health Responsibility"=
+               c(A.hr.t$p.value, A.hr.t$conf.int[1], A.hr.t$conf.int[2],
+                 B.hr.t$p.value, B.hr.t$conf.int[1], B.hr.t$conf.int[2],
+                 AB.hr.t$p.value, AB.hr.t$conf.int[1], AB.hr.t$conf.int[2]))
+m <- rbind(m, "Physical Activity"=
+               c(A.pa.t$p.value, A.pa.t$conf.int[1], A.pa.t$conf.int[2],
+                 B.pa.t$p.value, B.pa.t$conf.int[1], B.pa.t$conf.int[2],
+                 AB.pa.t$p.value, AB.pa.t$conf.int[1], AB.pa.t$conf.int[2]))
+m <- rbind(m, "Nutrition"=
+               c(A.n.t$p.value, A.n.t$conf.int[1], A.n.t$conf.int[2],
+                 B.n.t$p.value, B.n.t$conf.int[1], B.n.t$conf.int[2],
+                 AB.n.t$p.value, AB.n.t$conf.int[1], AB.n.t$conf.int[2]))
+m <- rbind(m, "Spiritual Growth"=
+               c(A.sg.t$p.value, A.sg.t$conf.int[1], A.sg.t$conf.int[2],
+                 B.sg.t$p.value, B.sg.t$conf.int[1], B.sg.t$conf.int[2],
+                 AB.sg.t$p.value, AB.sg.t$conf.int[1], AB.sg.t$conf.int[2]))
+m <- rbind(m, "Interpersonal Relations"=
+               c(A.ir.t$p.value, A.ir.t$conf.int[1], A.ir.t$conf.int[2],
+                 B.ir.t$p.value, B.ir.t$conf.int[1], B.ir.t$conf.int[2],
+                 AB.ir.t$p.value, AB.ir.t$conf.int[1], AB.ir.t$conf.int[2]))
+m <- rbind(m, "Stress Management"=
+               c(A.sm.t$p.value, A.sm.t$conf.int[1], A.sm.t$conf.int[2],
+                 B.sm.t$p.value, B.sm.t$conf.int[1], B.sm.t$conf.int[2],
+                 AB.sm.t$p.value, AB.sm.t$conf.int[1], AB.sm.t$conf.int[2]))
+
+kable(round(m,5))
 ```
+
 
 ### Results
 
-While mean delta scores were larger in group A than group B for overall and each category, the only scores to be significantly larger are nutrition (p=`r t.test(n_delta~group, data=sc, alt="g")$p.value`) and spirital growth (p=`r t.test(sg_delta~group, data=sc, alt="g")$p.value`)
+Every category score, except physical activity, showed signicant increases in group A, whereas group B showed signicant increases only in health responsibility. Only in categories nutrition and spiritual growth were changes in group A significantly larger than group B.
+
+### Non-parametric Ananlysis
+
+```{r}
+overall.num <- c(1:52)
+hr.num <- c(3,9,15,21,27,33,39,45,51)
+pa.num <- c(4,10,16,22,28,34,40,46)
+n.num <- c(2,8,14,20,26,32,38,44,50)
+sg.num <- c(6,12,18,24,30,36,42,48,52)
+ir.num <- c(1,7,13,19,25,31,37,43,49)
+sm.num <- c(5,11,17,23,29,35,41,47)
+```
