@@ -234,6 +234,27 @@ Stress Management          0.04373    0.00531      Inf   0.35142   -0.12363     
 
 Every category score, except physical activity, showed signicant increases in group A, whereas group B showed signicant increases only in health responsibility. Only in categories nutrition and spiritual growth were changes in group A significantly larger than group B.
 
-### Non-parametric Ananlysis
+## Non-parametric Analysis
+
+Since the range of values for the data set is narrow (only four possible answers for each question), it may not be useful to only examine the magnitude of the mean change, as is done above. Alternatively, we can examine the probability an answer increases between the pre assessment and the post assessment (this is known as the sign test). Specifically, probability is calculated as number of times an answer increases divided by number of times an answer changes (instances where the answer does not change are ingored for this analysis). Thus, if there were no effect, we would expect the probability of increase to be 0.5, or the same as the probability of decrease. This becomes our null hypothesis. We then compare our results against a binomial distribution to calculate p-values and confidence intervals. The results are below.
 
 
+
+![](analysis_files/figure-html/unnamed-chunk-16-1.png) 
+
+
+                                   A     (lower,      upper)   p (A>0.5)           B     (lower,      upper)   p (B>0.5)
+------------------------  ----------  ----------  ----------  ----------  ----------  ----------  ----------  ----------
+Overall                    0.6547744   0.6236219   0.6849668   0.0000000   0.5718016   0.5358874   0.6071609   0.0000799
+Health Responsibility      0.6845238   0.6084660   0.7539337   0.0000020   0.6444444   0.5575125   0.7248873   0.0009995
+Physical Activity          0.5647059   0.4866605   0.6404551   0.1069866   0.5702479   0.4771146   0.6598606   0.1454865
+Nutrition                  0.6812500   0.6030455   0.7525935   0.0000053   0.5564516   0.4645328   0.6456112   0.2429228
+Spiritual Growth           0.7000000   0.6198788   0.7720300   0.0000011   0.5149254   0.4270763   0.6021003   0.7956287
+Interpersonal Relations    0.7210884   0.6412037   0.7918324   0.0000001   0.6111111   0.5202279   0.6966455   0.0158182
+Stress Management          0.5886076   0.5076520   0.6661751   0.0313866   0.5317460   0.4408070   0.6211587   0.5330528
+
+### Results
+
+Again, most group B values do not show significant increases. Physical activity, nutrition, spiritual growth and stress management all contain 0.5 within their confidence intervals (and have p-values > 0.05). All group A values except physical activity, on the other hand, do display significant increases (confidence intervals do not include 0.5 and p-values < 0.05). Overall, nutrition, spiritual growth and interpersonal relations categories all show significantly higher probability of increase in group A than in group B.
+
+Note: since the data points for this analysis are individual questions, the overall category has a sample size approximately six times as large as any other category. This results in noticably smaller confidence intervals. Also, this analysis ignores ties, questions whose answers did not change, which were a large portion of the data set.

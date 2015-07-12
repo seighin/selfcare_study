@@ -23,10 +23,6 @@ require(gridExtra)
 sc <- read.csv('selfcare_processed.csv')
 sc.a <- filter(sc, group=="A")
 sc.b <- filter(sc, group=="B")
-
-sc.nopar <- read.csv('selfcare_nopar_processed.csv')
-sc.nopar.a <- filter(sc.nopar, group=="A")
-sc.nopar.b <- filter(sc.nopar, group=="B")
 ```
 
 ## Data
@@ -155,6 +151,7 @@ g2 <- g2 + stat_density(alpha=.3, position = "identity")
 g2 <- g2 + geom_histogram(aes(y=..density..),position="dodge")
 g2 <- g2 + scale_fill_manual(values = c("red", "blue"))
 g2 <- g2 + ggtitle("Year RN distribution")
+
 
 grid.arrange(g1, g2, ncol=2)
 ```
@@ -373,14 +370,100 @@ kable(round(m,5))
 
 Every category score, except physical activity, showed signicant increases in group A, whereas group B showed signicant increases only in health responsibility. Only in categories nutrition and spiritual growth were changes in group A significantly larger than group B.
 
-### Non-parametric Ananlysis
+## Non-parametric Analysis
+
+Since the range of values for the data set is narrow (only four possible answers for each question), it may not be useful to only examine the magnitude of the mean change, as is done above. Alternatively, we can examine the probability an answer increases between the pre assessment and the post assessment (this is known as the sign test). Specifically, probability is calculated as number of times an answer increases divided by number of times an answer changes (instances where the answer does not change are ingored for this analysis). Thus, if there were no effect, we would expect the probability of increase to be 0.5, or the same as the probability of decrease. This becomes our null hypothesis. We then compare our results against a binomial distribution to calculate p-values and confidence intervals. The results are below.
 
 ```{r}
 overall.num <- c(1:52)
+overall.q <- paste0('q',overall.num)
 hr.num <- c(3,9,15,21,27,33,39,45,51)
+hr.q <- paste0('q',hr.num)
 pa.num <- c(4,10,16,22,28,34,40,46)
+pa.q <- paste0('q',pa.num)
 n.num <- c(2,8,14,20,26,32,38,44,50)
+n.q <- paste0('q',n.num)
 sg.num <- c(6,12,18,24,30,36,42,48,52)
+sg.q <- paste0('q',sg.num)
 ir.num <- c(1,7,13,19,25,31,37,43,49)
+ir.q <- paste0('q',ir.num)
 sm.num <- c(5,11,17,23,29,35,41,47)
+sm.q <- paste0('q',sm.num)
+
+sc.nopar <- as_data_frame(read.csv('selfcare_nopar_long.csv'))
+sc.nopar <- filter(sc.nopar, time=="delta" & !is.na(answer))
+
+sc.nopar.hr <- filter(sc.nopar, question %in% hr.q)
+sc.nopar.pa <- filter(sc.nopar, question %in% pa.q)
+sc.nopar.n <- filter(sc.nopar, question %in% n.q)
+sc.nopar.sg <- filter(sc.nopar, question %in% sg.q)
+sc.nopar.ir <- filter(sc.nopar, question %in% ir.q)
+sc.nopar.sm <- filter(sc.nopar, question %in% sm.q)
+
+# conduct binomial test for each category and group
+sc.nopar.test <- sc.nopar %>%
+    group_by(group, cat) %>%
+    summarize(n=sum(answer!=0), T=sum(answer>0), est=0, p=0, conf.lower=0, conf.upper=0)
+
+# add rows for overall
+sc.nopar.test$cat <- factor(sc.nopar.test$cat, levels=c(levels(sc.nopar.test$cat), "overall"))
+sc.nopar.test <- rbind(sc.nopar.test,
+                       list(group="A", cat="overall",
+                            n=sum(sc.nopar[sc.nopar$group=="A",]$answer!=0), 
+                            T=sum(sc.nopar[sc.nopar$group=="A",]$answer>0), 
+                            est=0, p=0, conf.lower=0, conf.upper=0))
+sc.nopar.test <- rbind(sc.nopar.test,
+                       list(group="B", cat="overall",
+                            n=sum(sc.nopar[sc.nopar$group=="B",]$answer!=0), 
+                            T=sum(sc.nopar[sc.nopar$group=="B",]$answer>0), 
+                            est=0, p=0, conf.lower=0, conf.upper=0))
+
+for (i in 1:nrow(sc.nopar.test)){
+    bt <- binom.test(sc.nopar.test[i,]$T, sc.nopar.test[i,]$n)
+    sc.nopar.test[i,]$est <- bt$estimate
+    sc.nopar.test[i,]$p <- bt$p.value
+    sc.nopar.test[i,]$conf.lower <- bt$conf.int[1]
+    sc.nopar.test[i,]$conf.upper <- bt$conf.int[2]
+}
+
+sc.nopar.test <- ungroup(sc.nopar.test) %>%
+    mutate(cat.fac = factor(cat, levels=levels(cat)[c(7,1,4,3,5,2,6)],
+                            labels=c("Overall","Health Responsibility", 
+                                     "Physical Activity", "Nutrition",
+                                     "Spiritual Growth", "Interpersonal Relations",
+                                     "Stress Management"))) %>%
+    arrange(cat.fac)
 ```
+
+```{r, fig.width=8, fig.height=4}
+g <- ggplot(data=sc.nopar.test, aes(x=est, y=reorder(cat.fac, 8-as.numeric(cat.fac)), color=group))
+g <- g + geom_errorbarh(aes(xmin=conf.lower,
+                            xmax=conf.upper),
+                        height=.5, size=.5, alpha=.6)
+g <- g + geom_point(shape=19)
+g <- g + scale_color_manual(values=c("red", "blue"))
+g <- g + xlab("Estimated probability of increase with 95% confidence interval")
+g <- g + ylab("Score category")
+
+g
+```
+
+```{r}
+sc.nopar.test.a <- filter(sc.nopar.test, group=="A")
+sc.nopar.test.b <- filter(sc.nopar.test, group=="B")
+
+sc.nopar.table <- matrix(c(sc.nopar.test.a$est, sc.nopar.test.a$conf.lower,
+                           sc.nopar.test.a$conf.upper,sc.nopar.test.a$p,
+                           sc.nopar.test.b$est, sc.nopar.test.b$conf.lower,
+                           sc.nopar.test.b$conf.upper,sc.nopar.test.b$p),
+                         ncol=8, dimnames=list(levels(sc.nopar.test$cat.fac),
+                                               c("A", "(lower,","upper)", "p (A>0.5)",
+                                                 "B", "(lower,","upper)", "p (B>0.5)")))
+kable(sc.nopar.table)
+```
+
+### Results
+
+Again, most group B values do not show significant increases. Physical activity, nutrition, spiritual growth and stress management all contain 0.5 within their confidence intervals (and have p-values > 0.05). All group A values except physical activity, on the other hand, do display significant increases (confidence intervals do not include 0.5 and p-values < 0.05). Overall, nutrition, spiritual growth and interpersonal relations categories all show significantly higher probability of increase in group A than in group B.
+
+Note: since the data points for this analysis are individual questions, the overall category has a sample size approximately six times as large as any other category. This results in noticably smaller confidence intervals. Also, this analysis ignores ties, questions whose answers did not change, which were a large portion of the data set.

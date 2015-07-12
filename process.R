@@ -104,11 +104,14 @@ sc.nopar.mid <- sc.nopar %>%
            age=age.std, race=race.std, time, question, answer) %>%
     mutate(time_question=paste(time,question,sep="_"))
 
+
 # add delta values for each subject and each question
 for (i in levels(sc.nopar.mid$code)) {
     row <- filter(sc.nopar.mid, code==i)[1,]
     for (j in levels(sc.nopar.mid$question)) {
         new_row <- row
+        new_row$time <- "delta"
+        new_row$question <- j
         new_row$time_question <- paste0("delta_", j)
         new_row$answer <- filter(sc.nopar.mid, code==i & question==j & time=="post")$answer -
             filter(sc.nopar.mid, code==i & question==j & time=="pre")$answer
@@ -118,9 +121,21 @@ for (i in levels(sc.nopar.mid$code)) {
 }
 
 # transform back into a wide table with one row per subject
-sc.nopar.final <- sc.nopar.mid %>%
+sc.nopar.final1 <- sc.nopar.mid %>%
     filter(!(code=="1326")) %>%
+    mutate(cat="overall")
+
+# define cat column which indicates which category each question is part of
+sc.nopar.final1[sc.nopar.final1$question %in% hr.col,]$cat <- 'hr'
+sc.nopar.final1[sc.nopar.final1$question %in% pa.col,]$cat <- 'pa'
+sc.nopar.final1[sc.nopar.final1$question %in% n.col,]$cat <- 'n'
+sc.nopar.final1[sc.nopar.final1$question %in% sg.col,]$cat <- 'sg'
+sc.nopar.final1[sc.nopar.final1$question %in% ir.col,]$cat <- 'ir'
+sc.nopar.final1[sc.nopar.final1$question %in% sm.col,]$cat <- 'sm'
+
+sc.nopar.final2 <- sc.nopar.final1 %>%
     select(code:race, time_question, answer) %>%
     spread(time_question, answer)
 
-write.csv(sc.nopar.final, 'selfcare_nopar_processed.csv')
+write.csv(sc.nopar.final1, 'selfcare_nopar_long.csv')
+write.csv(sc.nopar.final2, 'selfcare_nopar_wide.csv')
