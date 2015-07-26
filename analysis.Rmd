@@ -140,13 +140,13 @@ m.tab3
 ```
 
 ```{r, fig.height=3, fig.width=9}
-g1 <- ggplot(data=sc, aes(x=age, fill=group))
+g1 <- ggplot(data=filter(sc, !is.na(age)), aes(x=age, fill=group))
 g1 <- g1 + stat_density(alpha=.3, position = "identity")
 g1 <- g1 + geom_histogram(aes(y=..density..),position="dodge")
 g1 <- g1 + scale_fill_manual(values = c("red", "blue"))
 g1 <- g1 + ggtitle("Age distribution")
 
-g2 <- ggplot(data=sc, aes(x=yearsrn, fill=group))
+g2 <- ggplot(data=filter(sc, !is.na(yearsrn)), aes(x=yearsrn, fill=group))
 g2 <- g2 + stat_density(alpha=.3, position = "identity")
 g2 <- g2 + geom_histogram(aes(y=..density..),position="dodge")
 g2 <- g2 + scale_fill_manual(values = c("red", "blue"))

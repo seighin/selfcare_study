@@ -1,0 +1,175 @@
+---
+title: "Self-care Final Report"
+author: "Michael Shyne"
+date: "07/22/2015"
+output: pdf_document
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(comment=NA,
+                      echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+
+```{r}
+require(dplyr, quiet=T, warn=F)
+require(tidyr)
+require(xtable)
+require(knitr)
+require(ggplot2)
+require(gridExtra)
+
+sc <- read.csv('selfcare_processed.csv')
+sc.a <- filter(sc, group=="A")
+sc.b <- filter(sc, group=="B")
+```
+
+# Method
+
+## Design and Procedure
+
+The study was a treatment-control design, involving working nurses taking a graduate level nursing theory course at an urban university. Four sections of the course, conducted at two locations, were randomly assigned to one of two groups, A or B. All students were asked to complete a self-care assessment (Health-Promoting Lifestyle Profile II) at the beginning of the semester and again at the end of the semester, along with self-identified demographic information. The assessments were anonymous. "Pre" and "post" assessments were matched using secret codes, a short word or number selected by each student. All students were also instructed on the importance of self-care and asked to write a reflective summary of their self-care activities. In addition, students in group A were asked to create and implement a self-care plan based on the findings of the initial assessment.
+
+## Instrument
+
+The Health-Promoting Lifestyle Profile II (HPLP II) consists of 52 Likert scale questions with 4 possible answers, never (N), sometimes (S), often (O) and routinely (R). The answers are scored 1 to 4, respectively. The HPLP II generates seven scores, an overall score and categorical scores for health responsibility, physical activity, nutrition, spiritual growth, interpersonal relations and stress management.  The scores are calculated by taking the mean of all answers for the overall score or the mean of a specified collection of answers for each category score.
+
+## Data Entry and Processing
+
+At the time of data entry, assessments were matched according to secret codes. Assessments with nearly matching codes and similar demographic information and handwriting were included. Six pairs of assessments did not have matching or nearly matching codes, but were determined to be likely pairs due to demographic information and handwriting. These were labeled "section 3" for convienience. All initial tests were conducted with and without "section 3". As there was no significant difference whether "section 3" was included, those assessments were included in the sample for final analysis. One assessment was only half completed and thus that sudent was excluded from the sample.
+
+Data from paper assessments were manually entered into a spreadsheet. A randomly selected 10% validation sample was checked for errors. No errors were found.
+
+The seven HPLP II scores (overall and six categories) were calculated for "pre" and "post" assessments. The change from "pre" scores to the "post" scores, refered to hereafter as delta scores, were generated for each student. The race variable was simplified into "white", "black" or "other" (which included hispanic, indian and biracial entries).
+
+## Statistical Analysis
+
+Statistical analysis was conducted using R (version 3.2.0). The demographic information was examined for differences between groups using independent t-tests for continuous variables (age and years RN) and Fisher's test for categorical variables (gender and race). Variables that showed significant differences between groups were tested for effects on HPLP II delta scores.
+
+One sample one-sided t-tests were conducted by group and category to test whether delta scores were greater than zero. Independent sample one-sided t-tests were conducted by category to test whether group A delta scores were greater than group B delta scores.
+
+# Results
+
+## Sample Characteristics
+
+```{r}
+n.tot <- nrow(sc)
+n.A <- nrow(sc.a)
+n.B <- nrow(sc.b)
+
+t.display <- function(x,t){
+    paste0(x, ' (', round(100*x/t,1), '\\%)')
+}
+t.display2 <- function(x){
+    paste0(round(mean(x, na.rm=T), 3), ' (sd=', round(sd(x, na.rm=T),2), ')' )
+}
+```
+\begin{tabular}{l r | c c c}
+&& Total & Group A & Group B\\
+\hline
+& n & `r n.tot` & `r n.A` & `r n.B`\\
+&&\\
+& Age (mean)
+  & `r t.display2(sc$age)` 
+  & `r t.display2(sc.a$age)`
+  & `r t.display2(sc.b$age)` \\
+&& \\
+& Years RN (mean)
+  & `r t.display2(sc$yearsrn)` 
+  & `r t.display2(sc.a$yearsrn)`
+  & `r t.display2(sc.b$yearsrn)` \\
+&& \\
+Gender &&\\
+& Female 
+  & `r t.display(sum(sc$gender=="Female",na.rm=T), n.tot)`
+  & `r t.display(sum(sc.a$gender=="Female",na.rm=T), n.A)`
+  & `r t.display(sum(sc.b$gender=="Female",na.rm=T), n.B)`\\
+& Male 
+  & `r t.display(sum(sc$gender=="Male",na.rm=T), n.tot)`
+  & `r t.display(sum(sc.a$gender=="Male",na.rm=T), n.A)`
+  & `r t.display(sum(sc.b$gender=="Male",na.rm=T), n.B)`\\
+& Missing
+  & `r t.display(sum(is.na(sc$gender)), n.tot)`
+  & `r t.display(sum(is.na(sc.a$gender)), n.A)`
+  & `r t.display(sum(is.na(sc.b$gender)), n.B)`\\
+&&\\
+Race &&\\
+& White
+  & `r t.display(sum(sc$race=="White",na.rm=T), n.tot)`
+  & `r t.display(sum(sc.a$race=="White",na.rm=T), n.A)`
+  & `r t.display(sum(sc.b$race=="White",na.rm=T), n.B)`\\
+& Black
+  & `r t.display(sum(sc$race=="Black",na.rm=T), n.tot)`
+  & `r t.display(sum(sc.a$race=="Black",na.rm=T), n.A)`
+  & `r t.display(sum(sc.b$race=="Black",na.rm=T), n.B)`\\
+& Other
+  & `r t.display(sum(sc$race=="Other",na.rm=T), n.tot)`
+  & `r t.display(sum(sc.a$race=="Other",na.rm=T), n.A)`
+  & `r t.display(sum(sc.b$race=="Other",na.rm=T), n.B)`\\
+& Missing
+  & `r t.display(sum(is.na(sc$race)), n.tot)`
+  & `r t.display(sum(is.na(sc.a$race)), n.A)`
+  & `r t.display(sum(is.na(sc.b$race)), n.B)`\\
+
+\end{tabular}
+
+
+```{r, results='asis'}
+AB.overall.t <- t.test(overall_delta~group, data=sc, alt="g")
+AB.hr.t <- t.test(hr_delta~group, data=sc, alt="g")
+AB.pa.t <- t.test(pa_delta~group, data=sc, alt="g")
+AB.n.t <- t.test(n_delta~group, data=sc, alt="g")
+AB.sg.t <- t.test(sg_delta~group, data=sc, alt="g")
+AB.ir.t <- t.test(ir_delta~group, data=sc, alt="g")
+AB.sm.t <- t.test(sm_delta~group, data=sc, alt="g")
+
+A.overall.t <- t.test(sc.a$overall_delta, alt="g")
+A.hr.t <- t.test(sc.a$hr_delta, alt="g")
+A.pa.t <- t.test(sc.a$pa_delta, alt="g")
+A.n.t <- t.test(sc.a$n_delta, alt="g")
+A.sg.t <- t.test(sc.a$sg_delta, alt="g")
+A.ir.t <- t.test(sc.a$ir_delta, alt="g")
+A.sm.t <- t.test(sc.a$sm_delta, alt="g")
+
+B.overall.t <- t.test(sc.b$overall_delta, alt="g")
+B.hr.t <- t.test(sc.b$hr_delta, alt="g")
+B.pa.t <- t.test(sc.b$pa_delta, alt="g")
+B.n.t <- t.test(sc.b$n_delta, alt="g")
+B.sg.t <- t.test(sc.b$sg_delta, alt="g")
+B.ir.t <- t.test(sc.b$ir_delta, alt="g")
+B.sm.t <- t.test(sc.b$sm_delta, alt="g")
+
+m <- matrix(c(A.overall.t$p.value, A.overall.t$conf.int[1], A.overall.t$conf.int[2],
+              B.overall.t$p.value, B.overall.t$conf.int[1], B.overall.t$conf.int[2],
+              AB.overall.t$p.value, AB.overall.t$conf.int[1], AB.overall.t$conf.int[2]),
+            ncol=9, 
+            dimnames=list("Overall", c("A>0 (p)", "(lower,","upper)",
+                                       "B>0 (p)", "(lower,","upper)",
+                                       "A>B (p)", "(lower,","upper)")))
+m <- rbind(m, "Health Responsibility"=
+               c(A.hr.t$p.value, A.hr.t$conf.int[1], A.hr.t$conf.int[2],
+                 B.hr.t$p.value, B.hr.t$conf.int[1], B.hr.t$conf.int[2],
+                 AB.hr.t$p.value, AB.hr.t$conf.int[1], AB.hr.t$conf.int[2]))
+m <- rbind(m, "Physical Activity"=
+               c(A.pa.t$p.value, A.pa.t$conf.int[1], A.pa.t$conf.int[2],
+                 B.pa.t$p.value, B.pa.t$conf.int[1], B.pa.t$conf.int[2],
+                 AB.pa.t$p.value, AB.pa.t$conf.int[1], AB.pa.t$conf.int[2]))
+m <- rbind(m, "Nutrition"=
+               c(A.n.t$p.value, A.n.t$conf.int[1], A.n.t$conf.int[2],
+                 B.n.t$p.value, B.n.t$conf.int[1], B.n.t$conf.int[2],
+                 AB.n.t$p.value, AB.n.t$conf.int[1], AB.n.t$conf.int[2]))
+m <- rbind(m, "Spiritual Growth"=
+               c(A.sg.t$p.value, A.sg.t$conf.int[1], A.sg.t$conf.int[2],
+                 B.sg.t$p.value, B.sg.t$conf.int[1], B.sg.t$conf.int[2],
+                 AB.sg.t$p.value, AB.sg.t$conf.int[1], AB.sg.t$conf.int[2]))
+m <- rbind(m, "Interpersonal Relations"=
+               c(A.ir.t$p.value, A.ir.t$conf.int[1], A.ir.t$conf.int[2],
+                 B.ir.t$p.value, B.ir.t$conf.int[1], B.ir.t$conf.int[2],
+                 AB.ir.t$p.value, AB.ir.t$conf.int[1], AB.ir.t$conf.int[2]))
+m <- rbind(m, "Stress Management"=
+               c(A.sm.t$p.value, A.sm.t$conf.int[1], A.sm.t$conf.int[2],
+                 B.sm.t$p.value, B.sm.t$conf.int[1], B.sm.t$conf.int[2],
+                 AB.sm.t$p.value, AB.sm.t$conf.int[1], AB.sm.t$conf.int[2]))
+
+xtable(round(m,5))
+```
