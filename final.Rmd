@@ -2,7 +2,9 @@
 title: "Self-care Final Report"
 author: "Michael Shyne"
 date: "07/22/2015"
-output: pdf_document
+output:
+  pdf_document:
+    keep_tex: yes
 ---
 
 ```{r global_options, include=FALSE}
@@ -36,17 +38,21 @@ The Health-Promoting Lifestyle Profile II (HPLP II) consists of 52 Likert scale 
 
 ## Data Entry and Processing
 
-At the time of data entry, assessments were matched according to secret codes. Assessments with nearly matching codes and similar demographic information and handwriting were included. Six pairs of assessments did not have matching or nearly matching codes, but were determined to be likely pairs due to demographic information and handwriting. These were labeled "section 3" for convienience. All initial tests were conducted with and without "section 3". As there was no significant difference whether "section 3" was included, those assessments were included in the sample for final analysis. One assessment was only half completed and thus that sudent was excluded from the sample.
+At the time of data entry, assessments were matched according to secret codes. Assessments with nearly matching codes and similar demographic information and handwriting were included. Six pairs of assessments did not have matching or nearly matching codes, but were determined to be likely pairs due to demographic information and handwriting. These were labeled "section 3" for convenience. All initial tests were conducted with and without "section 3". As there was no significant difference whether "section 3" was included, those assessments were included in the sample for final analysis. One assessment was only half completed and thus that student was excluded from the sample.
 
 Data from paper assessments were manually entered into a spreadsheet. A randomly selected 10% validation sample was checked for errors. No errors were found.
 
-The seven HPLP II scores (overall and six categories) were calculated for "pre" and "post" assessments. The change from "pre" scores to the "post" scores, refered to hereafter as delta scores, were generated for each student. The race variable was simplified into "white", "black" or "other" (which included hispanic, indian and biracial entries).
+The seven HPLP II scores (overall and six categories) were calculated for "pre" and "post" assessments. The change from "pre" scores to the "post" scores, referred to hereafter as delta scores, were generated for each student. The race variable was simplified into "white", "black" or "other" (which included Hispanic, Indian and biracial entries).
 
 ## Statistical Analysis
 
-Statistical analysis was conducted using R (version 3.2.0). The demographic information was examined for differences between groups using independent t-tests for continuous variables (age and years RN) and Fisher's test for categorical variables (gender and race). Variables that showed significant differences between groups were tested for effects on HPLP II delta scores.
+Statistical analysis was conducted using R (version 3.2.0). 
+
+Summary statistics were generated for demographic information and HPLP II scores, including mean, standard deviation, minimum and maximum for continuous variables and distribution for categorical variables. The demographic information was examined for differences between groups using independent t-tests for continuous variables (age and years RN) and Fisher's test for categorical variables (gender and race). Variables that showed significant differences between groups (years RN and race) were tested for effects on HPLP II delta scores, linear regression for years RN and ANOVA for race.
 
 One sample one-sided t-tests were conducted by group and category to test whether delta scores were greater than zero. Independent sample one-sided t-tests were conducted by category to test whether group A delta scores were greater than group B delta scores.
+
+All tests were conducted at $\alpha = 0.05$ level of significance.
 
 # Results
 
@@ -61,60 +67,286 @@ t.display <- function(x,t){
     paste0(x, ' (', round(100*x/t,1), '\\%)')
 }
 t.display2 <- function(x){
-    paste0(round(mean(x, na.rm=T), 3), ' (sd=', round(sd(x, na.rm=T),2), ')' )
+    paste0(round(mean(x, na.rm=T), 3), ' (', round(sd(x, na.rm=T),2), ')' )
 }
+t.display3 <- function(x){
+    paste0(round(min(x, na.rm=T), 3), ', ', round(max(x, na.rm=T),2), ' (', round(median(x, na.rm=T),2) ,')' )
+}
+
 ```
+The sample consisted of `r n.tot` students, `r n.A` in group A and 
+`r n.B` in group B (Table$~$\ref{tab:demo}). The majority of students were female (`r round(100*sum(sc$gender=="Female",na.rm=T)/n.tot,1)`\%) and white (`r round(100*sum(sc$race=="White",na.rm=T)/n.tot,1)`\%). The mean student age was `r round(mean(sc$age, na.rm=T), 2)` years (sd=`r round(sd(sc$age, na.rm=T),2)`) and the mean years working as an RN was `r round(mean(sc$yearsrn, na.rm=T), 2)` (sd = `r round(sd(sc$yearsrn, na.rm=T), 2)`).
+
+\begin{table}[hbt]
+\centering
+\caption{Sample Demographics}
 \begin{tabular}{l r | c c c}
 && Total & Group A & Group B\\
 \hline
 & n & `r n.tot` & `r n.A` & `r n.B`\\
 &&\\
-& Age (mean)
+Age && \\
+& Mean (SD)
   & `r t.display2(sc$age)` 
   & `r t.display2(sc.a$age)`
   & `r t.display2(sc.b$age)` \\
+& Min, Max (Med)
+  & `r t.display3(sc$age)` 
+  & `r t.display3(sc.a$age)`
+  & `r t.display3(sc.b$age)` \\
 && \\
-& Years RN (mean)
+Years RN &&\\
+& Mean (SD)
   & `r t.display2(sc$yearsrn)` 
   & `r t.display2(sc.a$yearsrn)`
   & `r t.display2(sc.b$yearsrn)` \\
+& Min, Max (Med)
+  & `r t.display3(sc$yearsrn)` 
+  & `r t.display3(sc.a$yearsrn)`
+  & `r t.display3(sc.b$yearsrn)` \\
 && \\
 Gender &&\\
 & Female 
-  & `r t.display(sum(sc$gender=="Female",na.rm=T), n.tot)`
-  & `r t.display(sum(sc.a$gender=="Female",na.rm=T), n.A)`
-  & `r t.display(sum(sc.b$gender=="Female",na.rm=T), n.B)`\\
+  & `r t.display(sum(sc$gender=="Female",na.rm=T), sum(!is.na(sc$gender)))`
+  & `r t.display(sum(sc.a$gender=="Female",na.rm=T), sum(!is.na(sc.a$gender)))`
+  & `r t.display(sum(sc.b$gender=="Female",na.rm=T), sum(!is.na(sc.b$gender)))`\\
 & Male 
-  & `r t.display(sum(sc$gender=="Male",na.rm=T), n.tot)`
-  & `r t.display(sum(sc.a$gender=="Male",na.rm=T), n.A)`
-  & `r t.display(sum(sc.b$gender=="Male",na.rm=T), n.B)`\\
+  & `r t.display(sum(sc$gender=="Male",na.rm=T), sum(!is.na(sc$gender)))`
+  & `r t.display(sum(sc.a$gender=="Male",na.rm=T), sum(!is.na(sc.a$gender)))`
+  & `r t.display(sum(sc.b$gender=="Male",na.rm=T), sum(!is.na(sc.b$gender)))`\\
 & Missing
-  & `r t.display(sum(is.na(sc$gender)), n.tot)`
-  & `r t.display(sum(is.na(sc.a$gender)), n.A)`
-  & `r t.display(sum(is.na(sc.b$gender)), n.B)`\\
+  & `r sum(is.na(sc$gender))`
+  & `r sum(is.na(sc.a$gender))`
+  & `r sum(is.na(sc.b$gender))`\\
 &&\\
 Race &&\\
 & White
-  & `r t.display(sum(sc$race=="White",na.rm=T), n.tot)`
-  & `r t.display(sum(sc.a$race=="White",na.rm=T), n.A)`
-  & `r t.display(sum(sc.b$race=="White",na.rm=T), n.B)`\\
+  & `r t.display(sum(sc$race=="White",na.rm=T), sum(!is.na(sc$race)))`
+  & `r t.display(sum(sc.a$race=="White",na.rm=T), sum(!is.na(sc.a$race)))`
+  & `r t.display(sum(sc.b$race=="White",na.rm=T), sum(!is.na(sc.b$race)))`\\
 & Black
-  & `r t.display(sum(sc$race=="Black",na.rm=T), n.tot)`
-  & `r t.display(sum(sc.a$race=="Black",na.rm=T), n.A)`
-  & `r t.display(sum(sc.b$race=="Black",na.rm=T), n.B)`\\
+  & `r t.display(sum(sc$race=="Black",na.rm=T), sum(!is.na(sc$race)))`
+  & `r t.display(sum(sc.a$race=="Black",na.rm=T), sum(!is.na(sc.a$race)))`
+  & `r t.display(sum(sc.b$race=="Black",na.rm=T), sum(!is.na(sc.b$race)))`\\
 & Other
-  & `r t.display(sum(sc$race=="Other",na.rm=T), n.tot)`
-  & `r t.display(sum(sc.a$race=="Other",na.rm=T), n.A)`
-  & `r t.display(sum(sc.b$race=="Other",na.rm=T), n.B)`\\
+  & `r t.display(sum(sc$race=="Other",na.rm=T), sum(!is.na(sc$race)))`
+  & `r t.display(sum(sc.a$race=="Other",na.rm=T), sum(!is.na(sc.a$race)))`
+  & `r t.display(sum(sc.b$race=="Other",na.rm=T), sum(!is.na(sc.b$race)))`\\
 & Missing
-  & `r t.display(sum(is.na(sc$race)), n.tot)`
-  & `r t.display(sum(is.na(sc.a$race)), n.A)`
-  & `r t.display(sum(is.na(sc.b$race)), n.B)`\\
-
+  & `r sum(is.na(sc$race))`
+  & `r sum(is.na(sc.a$race))`
+  & `r sum(is.na(sc.b$race))`\\
 \end{tabular}
+    
+\label{tab:demo}
+\end{table}
 
+```{r}
+sc.yearsrn.tt <- t.test(yearsrn~group, data=sc)
+sc.age.tt <- t.test(age~group, data=sc)
+sc.gender.ct <- table(sc$group, sc$gender, useNA="no")
+sc.gender.ft <- fisher.test(sc.gender.ct)
+sc.race.ct <- table(sc$group, sc$race, useNA="no")
+sc.race.ft <- fisher.test(sc.race.ct)
+```
+
+Age (p=`r round(sc.age.tt$p.value,3)`) and gender (p=`r round(sc.gender.ft$p.value, 3)`) showed no significant differences between groups. Years RN (p=`r round(sc.yearsrn.tt$p.value,3)`) and race (p=`r round(sc.race.ft$p.value,3)`) showed significant differences between groups. Years RN and race were tested for effects on delta scores using linear regression (Years RN) or ANOVA (Race). However, no significant effect on delta scores was found for either variable (Table$~$\ref{tab:effect}).
+
+```{r}
+ovr.yrn.lm <- lm(overall_delta~yearsrn, data=sc)
+hr.yrn.lm <- lm(hr_delta~yearsrn, data=sc)
+pa.yrn.lm <- lm(pa_delta~yearsrn, data=sc)
+n.yrn.lm <- lm(n_delta~yearsrn, data=sc)
+sg.yrn.lm <- lm(sg_delta~yearsrn, data=sc)
+ir.yrn.lm <- lm(ir_delta~yearsrn, data=sc)
+sm.yrn.lm <- lm(sm_delta~yearsrn, data=sc)
+
+ovr.race.lm <- lm(overall_delta~race, data=sc)
+hr.race.lm <- lm(hr_delta~race, data=sc)
+pa.race.lm <- lm(pa_delta~race, data=sc)
+n.race.lm <- lm(n_delta~race, data=sc)
+sg.race.lm <- lm(sg_delta~race, data=sc)
+ir.race.lm <- lm(ir_delta~race, data=sc)
+sm.race.lm <- lm(sm_delta~race, data=sc)
+
+m <- matrix(c(summary(ovr.yrn.lm)$coef[2,3],
+              summary(ovr.yrn.lm)$coef[2,4],
+              anova(ovr.race.lm)$F[1],
+              anova(ovr.race.lm)$P[1]), 
+            ncol=4, dimnames=list(c("Overall"), c("Years RN t","p" ,"Race F", "p")))
+m <- rbind(m, "Health Responsibility"=c(summary(hr.yrn.lm)$coef[2,3],
+                                        summary(hr.yrn.lm)$coef[2,4], 
+                                        anova(hr.race.lm)$F[1],
+                                        anova(hr.race.lm)$P[1]))
+m <- rbind(m, "Physical Activity"=c(summary(pa.yrn.lm)$coef[2,3],
+                                    summary(pa.yrn.lm)$coef[2,4],
+                                    anova(pa.race.lm)$F[1],
+                                    anova(pa.race.lm)$P[1]))
+m <- rbind(m, "Nutrition"=c(summary(n.yrn.lm)$coef[2,3], 
+                            summary(n.yrn.lm)$coef[2,4],
+                            anova(n.race.lm)$F[1],
+                            anova(n.race.lm)$P[1]))
+m <- rbind(m, "Spiritual Growth"=c(summary(sg.yrn.lm)$coef[2,3],
+                                   summary(sg.yrn.lm)$coef[2,4],
+                                   anova(sg.race.lm)$F[1],
+                                   anova(sg.race.lm)$P[1]))
+m <- rbind(m, "Interpersonal Relations"=c(summary(ir.yrn.lm)$coef[2,3],
+                                          summary(ir.yrn.lm)$coef[2,4],
+                                          anova(ir.race.lm)$F[1],
+                                          anova(ir.race.lm)$P[1]))
+m <- rbind(m, "Stress Management"=c(summary(sm.yrn.lm)$coef[2,3],
+                                    summary(sm.yrn.lm)$coef[2,4],
+                                    anova(sm.race.lm)$F[1],
+                                    anova(sm.race.lm)$P[1]))
+```
+
+\begin{table}[hbt]
+\centering
+\caption{Effect of Years RN and Race on category scores}
 
 ```{r, results='asis'}
+print(xtable(m, digits=3, align='r|cccc', label="tab:effect",
+       caption='Effect of Years Rn and Race on category scores'),
+      hline.after=c(0), comment=FALSE, floating=FALSE)
+```
+    
+\label{tab:effect}
+\end{table}
+
+## Score Characteristics
+
+```{r}
+sc.score.tot <- gather(sc, type_time, score, -(X:race)) %>%
+    separate(type_time, into=c("type","time")) %>%
+    group_by(type, time) %>%
+    summarize(score_mean = mean(score), score_sd = sd(score), n=n(),
+              score_min=min(score), score_max=max(score), 
+              score_med=median(score)) %>%
+    ungroup() %>%
+    mutate(group="tot", type.fac=factor(type, levels=levels(factor(type))[c(4,1,5,3,6,2,7)],
+                       labels=c("Overall","Health Responsibility", 
+                                "Physical Activity", "Nutrition",
+                                "Spiritual Growth", "Interpersonal Relations",
+                                "Stress Management")),
+           time.fac=factor(time, levels=levels(factor(time))[c(3,2,1)],
+                           labels= c("Pre", "Post", "Delta")))
+
+sc.score.group <- gather(sc, type_time, score, -(X:race)) %>%
+    separate(type_time, into=c("type","time")) %>%
+    group_by(group, type, time) %>%
+    summarize(score_mean = mean(score), score_sd = sd(score), n=n(),
+              score_min=min(score), score_max=max(score), 
+              score_med=median(score)) %>%
+    ungroup() %>%
+    mutate(type.fac=factor(type, levels=levels(factor(type))[c(4,1,5,3,6,2,7)],
+                       labels=c("Overall","Health Responsibility", 
+                                "Physical Activity", "Nutrition",
+                                "Spiritual Growth", "Interpersonal Relations",
+                                "Stress Management")),
+           time.fac=factor(time, levels=levels(factor(time))[c(3,2,1)],
+                           labels= c("Pre", "Post", "Delta")))
+
+sc.score.char <- rbind(sc.score.tot, sc.score.group)
+```
+
+Overall scores for "pre" assessments ranged from `r round(sc.score.tot[sc.score.tot$type=='overall'&sc.score.tot$time=='pre','score_min'],2)` to `r round(sc.score.tot[sc.score.tot$type=='overall'&sc.score.tot$time=='pre','score_max'],2)` with a mean of `r round(sc.score.tot[sc.score.tot$type=='overall'&sc.score.tot$time=='pre','score_mean'],2)` (sd=`r round(sc.score.tot[sc.score.tot$type=='overall'&sc.score.tot$time=='pre','score_sd'],2)`). "Post" assessment scores ranged from `r round(sc.score.tot[sc.score.tot$type=='overall'&sc.score.tot$time=='post','score_min'],2)` to `r round(sc.score.tot[sc.score.tot$type=='overall'&sc.score.tot$time=='post','score_max'],2)` with a mean of `r round(sc.score.tot[sc.score.tot$type=='overall'&sc.score.tot$time=='post','score_mean'],2)` (sd=`r round(sc.score.tot[sc.score.tot$type=='overall'&sc.score.tot$time=='post','score_sd'],2)`). Delta scores ranged from `r round(sc.score.tot[sc.score.tot$type=='overall'&sc.score.tot$time=='delta','score_min'],2)` to `r round(sc.score.tot[sc.score.tot$type=='overall'&sc.score.tot$time=='delta','score_max'],2)` with a mean of `r round(sc.score.tot[sc.score.tot$type=='overall'&sc.score.tot$time=='delta','score_mean'],2)` (sd=`r round(sc.score.tot[sc.score.tot$type=='overall'&sc.score.tot$time=='delta','score_sd'],2)`) (Table \ref{tab:score}). Figure \ref{fig:score} displays mean scores and 95% confidence intervals (from appropriate t distributions) by group and category for "pre", "post" and "delta" scores.
+
+\begin{table}[hbt]
+\centering
+\caption{Score Characteristics}
+\begin{tabular}{l c  p{0.001cm} | c c c }
+&&& Total & Group A & Group B \\
+\hline
+``` {r, results='asis'}
+s.disp <- function(x){
+    cat('\\multicolumn{2}{c}{', x, "} &&\\\\ ")
+        
+    for(j in levels(sc.score.char$time.fac)){
+        mean.sd.str <- ''
+        min.max.str <- ''
+
+        row.tot <- sc.score.char[sc.score.char$group=='tot' & 
+                               sc.score.char$type.fac==x & 
+                               sc.score.char$time.fac==j,]
+        row.A <- sc.score.char[sc.score.char$group=='A' & 
+                               sc.score.char$type.fac==x & 
+                               sc.score.char$time.fac==j,]
+        row.B <- sc.score.char[sc.score.char$group=='B' & 
+                               sc.score.char$type.fac==x & 
+                               sc.score.char$time.fac==j,]
+        
+        mean.sd.str <- paste0(mean.sd.str, ' & ',
+                              round(row.tot$score_mean,2),
+                              ' (', round(row.tot$score_sd,2), ')')
+        mean.sd.str <- paste0(mean.sd.str, ' & ',
+                              round(row.A$score_mean,2),
+                              ' (', round(row.A$score_sd,2), ')')
+        mean.sd.str <- paste0(mean.sd.str, ' & ',
+                              round(row.B$score_mean,2),
+                              ' (', round(row.B$score_sd,2), ')')
+        
+        min.max.str <- paste0(min.max.str, ' & ',
+                              round(row.tot$score_med,2),
+                              ' (', round(row.tot$score_min,2), ', ',
+                              round(row.tot$score_max,2), ')')
+        min.max.str <- paste0(min.max.str, ' & ',
+                              round(row.A$score_med,2),
+                              ' (', round(row.A$score_min,2), ', ',
+                              round(row.A$score_max,2), ')')
+        min.max.str <- paste0(min.max.str, ' & ',
+                              round(row.B$score_med,2),
+                              ' (', round(row.B$score_min,2), ', ',
+                              round(row.B$score_max,2), ')')
+       
+        cat(j, ' & Mean (SD) &', mean.sd.str, '\\\\')
+        cat('& Med (Min, Max) &', min.max.str, '\\\\')
+    }
+    
+    cat('&&\\\\')
+
+}
+
+for (i in levels(sc.score.char$type.fac)){
+    s.disp(i)
+}
+```
+\end{tabular}
+    
+\label{tab:score}
+\end{table}
+
+
+```{r,fig.width=10, fig.height=4}
+sc.plot <- gather(sc, type_time, score, -(X:race)) %>%
+    separate(type_time, into=c("type","time")) %>%
+    group_by(group, type, time) %>%
+    summarize(score_mean = mean(score), score_sd = sd(score), n=n(),
+              score_min=min(score), score_max=max(score)) %>%
+    ungroup() %>%
+    mutate(type.fac=factor(type, levels=levels(factor(type))[c(4,1,5,3,6,2,7)],
+                       labels=c("Overall","Health Responsibility", 
+                                "Physical Activity", "Nutrition",
+                                "Spiritual Growth", "Interpersonal Relations",
+                                "Stress Management")),
+           time.fac=factor(time, levels=levels(factor(time))[c(3,2,1)],
+                           labels= c("Pre", "Post", "Delta")))
+
+g <- ggplot(data=sc.plot, aes(x=score_mean, y=reorder(type.fac, 8-as.numeric(type.fac)), color=group))
+g <- g + geom_errorbarh(aes(xmin=score_mean+score_sd*qt(.025, n-1)/sqrt(n),
+                            xmax=score_mean+score_sd*qt(.975, n-1)/sqrt(n)),
+                        height=.5, size=.5, alpha=.6)
+g <- g + geom_point(shape=19)
+g <- g + facet_grid(.~time.fac, scales="free_x")
+g <- g + scale_color_manual(values=c("red", "blue"))
+g <- g + xlab("Mean scores with 95% confidence interval")
+g <- g + ylab("Score category")
+
+g
+```
+
+## Group Effect on Scores
+
+```{r}
 AB.overall.t <- t.test(overall_delta~group, data=sc, alt="g")
 AB.hr.t <- t.test(hr_delta~group, data=sc, alt="g")
 AB.pa.t <- t.test(pa_delta~group, data=sc, alt="g")
@@ -138,38 +370,57 @@ B.n.t <- t.test(sc.b$n_delta, alt="g")
 B.sg.t <- t.test(sc.b$sg_delta, alt="g")
 B.ir.t <- t.test(sc.b$ir_delta, alt="g")
 B.sm.t <- t.test(sc.b$sm_delta, alt="g")
-
-m <- matrix(c(A.overall.t$p.value, A.overall.t$conf.int[1], A.overall.t$conf.int[2],
-              B.overall.t$p.value, B.overall.t$conf.int[1], B.overall.t$conf.int[2],
-              AB.overall.t$p.value, AB.overall.t$conf.int[1], AB.overall.t$conf.int[2]),
-            ncol=9, 
-            dimnames=list("Overall", c("A>0 (p)", "(lower,","upper)",
-                                       "B>0 (p)", "(lower,","upper)",
-                                       "A>B (p)", "(lower,","upper)")))
-m <- rbind(m, "Health Responsibility"=
-               c(A.hr.t$p.value, A.hr.t$conf.int[1], A.hr.t$conf.int[2],
-                 B.hr.t$p.value, B.hr.t$conf.int[1], B.hr.t$conf.int[2],
-                 AB.hr.t$p.value, AB.hr.t$conf.int[1], AB.hr.t$conf.int[2]))
-m <- rbind(m, "Physical Activity"=
-               c(A.pa.t$p.value, A.pa.t$conf.int[1], A.pa.t$conf.int[2],
-                 B.pa.t$p.value, B.pa.t$conf.int[1], B.pa.t$conf.int[2],
-                 AB.pa.t$p.value, AB.pa.t$conf.int[1], AB.pa.t$conf.int[2]))
-m <- rbind(m, "Nutrition"=
-               c(A.n.t$p.value, A.n.t$conf.int[1], A.n.t$conf.int[2],
-                 B.n.t$p.value, B.n.t$conf.int[1], B.n.t$conf.int[2],
-                 AB.n.t$p.value, AB.n.t$conf.int[1], AB.n.t$conf.int[2]))
-m <- rbind(m, "Spiritual Growth"=
-               c(A.sg.t$p.value, A.sg.t$conf.int[1], A.sg.t$conf.int[2],
-                 B.sg.t$p.value, B.sg.t$conf.int[1], B.sg.t$conf.int[2],
-                 AB.sg.t$p.value, AB.sg.t$conf.int[1], AB.sg.t$conf.int[2]))
-m <- rbind(m, "Interpersonal Relations"=
-               c(A.ir.t$p.value, A.ir.t$conf.int[1], A.ir.t$conf.int[2],
-                 B.ir.t$p.value, B.ir.t$conf.int[1], B.ir.t$conf.int[2],
-                 AB.ir.t$p.value, AB.ir.t$conf.int[1], AB.ir.t$conf.int[2]))
-m <- rbind(m, "Stress Management"=
-               c(A.sm.t$p.value, A.sm.t$conf.int[1], A.sm.t$conf.int[2],
-                 B.sm.t$p.value, B.sm.t$conf.int[1], B.sm.t$conf.int[2],
-                 AB.sm.t$p.value, AB.sm.t$conf.int[1], AB.sm.t$conf.int[2]))
-
-xtable(round(m,5))
 ```
+
+Group A delta scores were significantly greater than zero for all categories except physical activity. Group B scores were not significantly greater than zero in any category except health responsibility. Group A delta scores were significantly greater than group B scores in the categories nutrition (p=`r round(AB.n.t$p.value, 3)`) and spiritual growth (p=`r round(AB.sg.t$p.value, 3)`).
+
+```{r}
+m <- matrix(c(A.overall.t$statistic, A.overall.t$p.value, A.overall.t$conf.int[1],
+              B.overall.t$statistic, B.overall.t$p.value, B.overall.t$conf.int[1], 
+              AB.overall.t$statistic, AB.overall.t$p.value, AB.overall.t$conf.int[1]), 
+            ncol=9, 
+            dimnames=list("Overall", c("A>0 t", "p","lower",
+                                       "B>0 t", "p","lower",
+                                       "A>B t", "p","lower")))
+m <- rbind(m, "Health Responsibility"=
+               c(A.hr.t$statistic, A.hr.t$p.value, A.hr.t$conf.int[1], 
+                 B.hr.t$statistic, B.hr.t$p.value, B.hr.t$conf.int[1],
+                 AB.hr.t$statistic, AB.hr.t$p.value, AB.hr.t$conf.int[1]))
+m <- rbind(m, "Physical Activity"=
+               c(A.pa.t$statistic, A.pa.t$p.value, A.pa.t$conf.int[1],
+                 B.pa.t$statistic, B.pa.t$p.value, B.pa.t$conf.int[1], 
+                 AB.pa.t$statistic, AB.pa.t$p.value, AB.pa.t$conf.int[1]))
+m <- rbind(m, "Nutrition"=
+               c(A.n.t$statistic, A.n.t$p.value, A.n.t$conf.int[1],
+                 B.n.t$statistic, B.n.t$p.value, B.n.t$conf.int[1],
+                 AB.n.t$statistic, AB.n.t$p.value, AB.n.t$conf.int[1]))
+m <- rbind(m, "Spiritual Growth"=
+               c(A.sg.t$statistic, A.sg.t$p.value, A.sg.t$conf.int[1],
+                 B.sg.t$statistic, B.sg.t$p.value, B.sg.t$conf.int[1],
+                 AB.sg.t$statistic, AB.sg.t$p.value, AB.sg.t$conf.int[1]))
+m <- rbind(m, "Interpersonal Relations"=
+               c(A.ir.t$statistic, A.ir.t$p.value, A.ir.t$conf.int[1],
+                 B.ir.t$statistic, B.ir.t$p.value, B.ir.t$conf.int[1],
+                 AB.ir.t$statistic, AB.ir.t$p.value, AB.ir.t$conf.int[1]))
+m <- rbind(m, "Stress Management"=
+               c(A.sm.t$statistic, A.sm.t$p.value, A.sm.t$conf.int[1], 
+                 B.sm.t$statistic, B.sm.t$p.value, B.sm.t$conf.int[1], 
+                 AB.sm.t$statistic, AB.sm.t$p.value, AB.sm.t$conf.int[1]))
+```
+
+\begin{table}[hbt]
+\centering
+\caption{One-sided t-tests of delta scores with lower bound of 95% confidence interval}
+```{r, results='asis'}
+print(xtable(m, align="r|ccccccccc", digits=3,
+             caption='P values and 95% confidence intervals for one-sided t-tests',
+             label='tab:tests'),
+      hline.after=c(0), comment=FALSE, floating=FALSE)
+```
+\label{tab:tests}
+\end{table}
+
+
+# Conclusion
+
+Mean scores for every category and each group showed positive change from "pre" assessments to "post" assessments. However, only for group A were a majority of the scores (including the overall score) significantly larger than zero. The health responsibility category showed the greatest growth with a mean change of `r round(sc.score.tot[sc.score.tot$type=='hr'&sc.score.tot$time=='delta','score_mean'],2)` (sd=`r round(sc.score.tot[sc.score.tot$type=='hr'&sc.score.tot$time=='delta','score_sd'],2)`) while stress management had the lowest with a mean change of `r round(sc.score.tot[sc.score.tot$type=='sm'&sc.score.tot$time=='delta','score_mean'],2)` (sd=`r round(sc.score.tot[sc.score.tot$type=='sm'&sc.score.tot$time=='delta','score_sd'],2)`).
